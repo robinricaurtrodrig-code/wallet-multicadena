@@ -1,0 +1,54 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'providers/auth_provider.dart';
+import 'providers/wallet_provider.dart';
+import 'providers/security_provider.dart';
+import 'providers/connectivity_provider.dart';
+import 'services/firebase_messaging_service.dart';
+import 'app.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    // Inicializar Firebase
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+
+    // Inicializar FCM para notificaciones push
+    try {
+      await FirebaseMessagingService.init(navigatorKey);
+    } catch (_) {
+      // FCM no disponible en algunas plataformas, continuar igual
+    }
+  } catch (e) {
+    // Si falla la inicializacion, mostrar pantalla de error
+    runApp(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Text('Error al iniciar la aplicacion: $e'),
+          ),
+        ),
+      ),
+    );
+    return;
+  }
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => WalletProvider()),
+        ChangeNotifierProvider(create: (_) => SecurityProvider()),
+        ChangeNotifierProvider(create: (_) => ConnectivityProvider()),
+      ],
+      child: WalletApp(navigatorKey: navigatorKey),
+    ),
+  );
+}
