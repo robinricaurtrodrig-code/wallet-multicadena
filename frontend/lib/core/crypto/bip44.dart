@@ -2,7 +2,7 @@ import 'dart:typed_data';
 import 'package:bip32/bip32.dart' as bip32;
 import 'package:ed25519_hd_key/ed25519_hd_key.dart';
 import 'package:hex/hex.dart';
-import 'package:pinenacl/ed25519.dart' as ed;
+import 'package:cryptography/cryptography.dart';
 import 'package:pointycastle/export.dart';
 
 class BIP44Derivation {
@@ -58,9 +58,11 @@ class BIP44Derivation {
     final derivedKey = await ED25519_HD_KEY.derivePath(path, masterKey.key);
     final privateKeyBytes = Uint8List.fromList(derivedKey.key);
 
-    // Derivar la clave publica Ed25519 usando pinenacl
-    final signingKey = ed.SigningKey(seed: privateKeyBytes);
-    final publicKeyBytes = signingKey.verifyKey.asTypedList;
+    // Derivar la clave publica Ed25519 usando cryptography (compatible con web)
+    final ed25519 = Ed25519();
+    final keyPair = await ed25519.newKeyPairFromSeed(privateKeyBytes);
+    final publicKey = await keyPair.extractPublicKey();
+    final publicKeyBytes = Uint8List.fromList(publicKey.bytes);
 
     return base58Encode(publicKeyBytes);
   }

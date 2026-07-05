@@ -77,6 +77,7 @@
 - ✅ **Bugfix frontend**: PointyCastle RegistryError en web por minificación - reemplazo de FortunaRandom por Random.secure() en aes_encryption.dart y secure_storage.dart
 - ✅ **Bugfix frontend**: `importWallet` ahora muestra el error exacto en vez de mensaje genérico
 - ✅ **Bugfix frontend**: `import_wallet_screen.dart` - limpieza mejorada de seed phrase (reemplaza saltos de línea y separadores)
+- ✅ **Bugfix frontend**: `bip44.dart` - reemplazo de `pinenacl` por `cryptography` para Solana Ed25519 (compatible con web)
 - ✅ **Bugfix frontend**: `auth_provider.dart` - mensajes de error Firebase Auth mejorados (operation-not-allowed, network-request-failed, invalid-credential) en español
 - ✅ **Firestore Database**: Creada en Firebase Console (modo prueba) para que funcione el registro
 - ✅ **Firebase Auth**: Email/Password habilitado
@@ -89,14 +90,18 @@
 - `lib/providers/wallet_provider.dart`: Manejo de errores detallado por paso en `importWallet()`
 - `lib/screens/wallet/import_wallet_screen.dart`: Mejora en limpieza de seed phrase (regex para espacios múltiples, saltos de línea, comas)
 - `lib/providers/auth_provider.dart`: Errores Firebase Auth mapeados a español
+- `lib/core/crypto/bip44.dart`: Reemplazo `pinenacl` → `cryptography` para `deriveSolanaAddress()` (web compatible)
 - `backend/app/services/blockchain/bitcoin.py`: Fix iteración string + lógica received/sent
 - `backend/app/services/blockchain/bnb.py`: Fix eth_getLogs → JSON-RPC batch scan 5000 bloques
 - `.gitignore`: Agregado `firebase-credentials.json`
 
 ### Para la próxima sesión
-- ⬜ Probar importWallet con build profile (sin minificación)
 - ⬜ Desplegar frontend en Firebase Hosting para el equipo
 - ⬜ Desplegar backend en Render/Railway para funcionalidad completa
+- ⬜ Corregir 22 usos de `withOpacity()` deprecados (serán error en futuras versiones de Flutter)
+- ⬜ Agregar `pinenacl` como dependencia explícita o eliminarlo (ya no se usa, se reemplazó por `cryptography`)
+- ⬜ Probar Enviar/Recibir transacciones reales
+- ⬜ Agregar guards de plataforma para `mobile_scanner` y `local_auth` en web
 
 ### Comandos útiles
 ```powershell
