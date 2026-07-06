@@ -31,13 +31,12 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
   Widget build(BuildContext context) {
     final wallet = context.watch<WalletProvider>();
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Recibir')),
-      body: Column(
-        children: [
-          const SizedBox(height: 8),
-          // Tabs para seleccionar la red (Solana, Bitcoin, BNB)
-          TabBar(
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Recibir'),
+          bottom: TabBar(
             onTap: (i) {
               setState(() {
                 _selectedNetwork = ['solana', 'bitcoin', 'bnb'][i];
@@ -52,10 +51,8 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
             labelColor: AppTheme.primary,
             unselectedLabelColor: AppTheme.textDarkSecondary,
           ),
-          Expanded(
-            child: _buildNetworkTab(wallet),
-          ),
-        ],
+        ),
+        body: _buildNetworkTab(wallet),
       ),
     );
   }
