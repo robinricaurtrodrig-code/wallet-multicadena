@@ -95,13 +95,43 @@
 - `backend/app/services/blockchain/bnb.py`: Fix eth_getLogs → JSON-RPC batch scan 5000 bloques
 - `.gitignore`: Agregado `firebase-credentials.json`
 
+## Sesión 4 - 6 Julio 2026
+
+### Completado
+- ✅ **Bugfix Solana Ed25519 web**: El path BIP44 `m/44'/501'/0'/0/0` tenía segmentos no-endurecidos (`0` sin `'`), causando `FormatException` en `int.parse()` de `ed25519_hd_key`. Se agregó `_makeAllHardened()` en `bip44.dart` que convierte automáticamente todos los segmentos a endurecidos (`m/44'/501'/0'/0'/0'`) requerido por SLIP-0010/Ed25519
+- ✅ **`secure_storage.dart`**: Web compatible — usa `SharedPreferences` en web y `FlutterSecureStorage` en mobile
+- ✅ **`biometric_service.dart`**: Guard `kIsWeb` retorna `false` en navegador
+- ✅ **`firebase_messaging_service.dart`**: Inicialización perezosa, saltada en web
+- ✅ **`ApiService` compartido**: `AuthProvider` y `WalletProvider` usan la misma instancia de `ApiService` con JWT token
+- ✅ **`notifyListeners()` en `checkExistingWallet()`**: La UI se actualiza al cargar datos del storage
+- ✅ **`setup_pin_screen.dart`**: Ya no llama `saveWallet()` cuando la wallet ya está importada
+- ✅ **`history_screen.dart`**: Paginación, `mounted` checks, control de race conditions, detección de conectividad
+- ✅ **`receive_screen.dart`**: Agregado `DefaultTabController` para que los tabs de red funcionen
+- ✅ **`flutter build web` exitoso**: Compilación con todos los cambios
+- ✅ **Backend + Frontend corriendo simultáneamente**: API en puerto 8000, web en puerto 3000
+- ✅ **Git**: Todos los cambios commiteados (`701a0f8` mejoras, `baf991e` fix receive_screen)
+
+### Correcciones
+- `lib/core/crypto/bip44.dart`: Nuevo método `_makeAllHardened()` + refactor `deriveSolanaKey/deriveSolanaAddress`
+- `lib/core/storage/secure_storage.dart`: Rewrite completo con helpers `_write/_read/_delete` multi-plataforma
+- `lib/services/biometric_service.dart`: Guard `kIsWeb` en todos los métodos
+- `lib/services/firebase_messaging_service.dart`: Inicialización perezosa de `FirebaseMessaging.instance`
+- `lib/main.dart`: `ApiService` compartido + FCM condicional (`!kIsWeb`)
+- `lib/providers/auth_provider.dart`: `apiService` público, aceptado por constructor
+- `lib/providers/wallet_provider.dart`: `apiService` público, `notifyListeners()` en `checkExistingWallet()`
+- `lib/screens/history/history_screen.dart`: Reescrito con paginación, `_loadId` anti-race, conectividad
+- `lib/screens/wallet/setup_pin_screen.dart`: Skip `saveWallet` si `wallet.hasWallet` es true
+- `lib/screens/wallet/receive_screen.dart`: Wrap con `DefaultTabController`
+- `pubspec.yaml`: Agregados `shared_preferences`, `crypto`, restaurado `ed25519_hd_key`
+
 ### Para la próxima sesión
 - ⬜ Desplegar frontend en Firebase Hosting para el equipo
 - ⬜ Desplegar backend en Render/Railway para funcionalidad completa
 - ⬜ Corregir 22 usos de `withOpacity()` deprecados (serán error en futuras versiones de Flutter)
-- ⬜ Agregar `pinenacl` como dependencia explícita o eliminarlo (ya no se usa, se reemplazó por `cryptography`)
 - ⬜ Probar Enviar/Recibir transacciones reales
-- ⬜ Agregar guards de plataforma para `mobile_scanner` y `local_auth` en web
+- ⬜ Agregar guards de plataforma para `mobile_scanner` en web
+- ⬜ Verificar que el login con Firebase Auth funciona correctamente en web
+- ⬜ Probar la app en Android/iOS para asegurar que los cambios no rompieron mobile
 
 ### Comandos útiles
 ```powershell
