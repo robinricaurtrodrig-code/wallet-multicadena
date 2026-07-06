@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 import 'package:bip32/bip32.dart' as bip32;
-import 'package:ed25519_hd_key/ed25519_hd_key.dart';
 import 'package:hex/hex.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:pointycastle/export.dart';
+import 'package:ed25519_hd_key/ed25519_hd_key.dart';
 
 class BIP44Derivation {
   // Tipos de moneda segun BIP44 para cada red blockchain
@@ -20,15 +20,41 @@ class BIP44Derivation {
   }
 
   // ============================================================
+  // Derivacion de claves HD para Ed25519 (Solana)
+  // Usa SLIP-0010 via ed25519_hd_key (compatible con web)
+  // ============================================================
+
+  /// Convierte una ruta BIP44 (con niveles no endurecidos) a SLIP-0010
+  /// (todos endurecidos), ya que Ed25519 solo soporta derivacion endurecida.
+  static String _makeAllHardened(String path) {
+    final segments = path.split('/');
+    return segments.map((s) {
+      if (s == 'm') return s;
+      return s.endsWith("'") ? s : "$s'";
+    }).join('/');
+  }
+
+  static Future<Uint8List> _deriveEd25519Key(Uint8List seed, String path) async {
+    final hardenedPath = _makeAllHardened(path);
+    final derived = await ED25519_HD_KEY.derivePath(hardenedPath, seed);
+    return Uint8List.fromList(derived.key);
+  }
+
+  static Future<Uint8List> _getEd25519PublicKey(Uint8List privateKey) async {
+    final ed25519 = Ed25519();
+    final keyPair = await ed25519.newKeyPairFromSeed(privateKey);
+    final publicKey = await keyPair.extractPublicKey();
+    return Uint8List.fromList(publicKey.bytes);
+  }
+
+  // ============================================================
   // Derivacion de claves privadas para cada red
   // ============================================================
 
   /// Deriva la clave privada de Solana usando la curva Ed25519
   static Future<Uint8List> deriveSolanaKey(Uint8List seed, {int account = 0}) async {
     final path = getDerivationPath('solana', account: account);
-    final masterKey = await ED25519_HD_KEY.getMasterKeyFromSeed(seed);
-    final derivedKey = await ED25519_HD_KEY.derivePath(path, masterKey.key);
-    return Uint8List.fromList(derivedKey.key);
+    return await _deriveEd25519Key(seed, path);
   }
 
   /// Deriva la clave privada de Bitcoin usando secp256k1 (BIP32)
@@ -53,17 +79,8 @@ class BIP44Derivation {
   /// Deriva la direccion publica de Solana desde la semilla BIP39
   /// Formato: base58 de la clave publica Ed25519 (32 bytes)
   static Future<String> deriveSolanaAddress(Uint8List seed, {int account = 0}) async {
-    final path = getDerivationPath('solana', account: account);
-    final masterKey = await ED25519_HD_KEY.getMasterKeyFromSeed(seed);
-    final derivedKey = await ED25519_HD_KEY.derivePath(path, masterKey.key);
-    final privateKeyBytes = Uint8List.fromList(derivedKey.key);
-
-    // Derivar la clave publica Ed25519 usando cryptography (compatible con web)
-    final ed25519 = Ed25519();
-    final keyPair = await ed25519.newKeyPairFromSeed(privateKeyBytes);
-    final publicKey = await keyPair.extractPublicKey();
-    final publicKeyBytes = Uint8List.fromList(publicKey.bytes);
-
+    final privateKeyBytes = await deriveSolanaKey(seed, account: account);
+    final publicKeyBytes = await _getEd25519PublicKey(privateKeyBytes);
     return base58Encode(publicKeyBytes);
   }
 
@@ -78,13 +95,6 @@ class BIP44Derivation {
     // HASH160 = RIPEMD160(SHA256(clave_publica_comprimida))
     final pubkeyHash = derivedKey.identifier;  // 20 bytes
 
-    // NOTA IMPORTANTE: Para generar una direccion bech32 valida se necesita:
-    // 1. Witness program: 0x00 (version) + pubkeyHash (20 bytes)
-    // 2. Codificar con bech32 (prefijo "bc" para mainnet)
-    //
-    // La codificacion bech32 requiere una implementacion especifica (polinomio BCH,
-    // conversion a base32, etc.) que no esta disponible actualmente.
-    // Como alternativa, retornamos la direccion legacy P2PKH (1...) que usa base58.
     return generateP2PKHAddress(pubkeyHash);
   }
 
@@ -118,40 +128,26 @@ class BIP44Derivation {
   // ============================================================
 
   /// Genera una direccion P2PKH legacy (1...) a partir del HASH160
-  /// Formato: base58Check(0x00 + HASH160 + checksum)
   static String generateP2PKHAddress(Uint8List pubkeyHash) {
-    // Prefijo 0x00 para direcciones P2PKH mainnet
     final versionByte = Uint8List.fromList([0x00]);
-
-    // Concatenar version byte + pubkey hash
     final versionedHash = Uint8List.fromList([...versionByte, ...pubkeyHash]);
-
-    // Calcular checksum: primeros 4 bytes del SHA256(SHA256(versionedHash))
     final checksum = sha256(sha256(versionedHash)).sublist(0, 4);
-
-    // Concatenar todo: version + hash + checksum
     final binaryAddress = Uint8List.fromList([...versionedHash, ...checksum]);
-
-    // Codificar en base58
     return base58Encode(binaryAddress);
   }
 
   // ============================================================
-  // Codificacion Base58 (usada en Solana y Bitcoin legacy)
+  // Codificacion Base58
   // ============================================================
 
   static const String _base58Alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 
-  /// Codifica un arreglo de bytes a string base58
-  /// Se usa para direcciones de Solana y direcciones legacy de Bitcoin
   static String base58Encode(Uint8List bytes) {
-    // Convertir bytes a BigInt
     BigInt value = BigInt.from(0);
     for (final byte in bytes) {
       value = (value << 8) + BigInt.from(byte);
     }
 
-    // Convertir a base58
     String result = '';
     while (value > BigInt.zero) {
       final remainder = (value % BigInt.from(58)).toInt();
@@ -159,7 +155,6 @@ class BIP44Derivation {
       result = _base58Alphabet[remainder] + result;
     }
 
-    // Agregar '1' por cada byte 0x00 al inicio del arreglo original
     for (final byte in bytes) {
       if (byte == 0) {
         result = '1$result';
@@ -175,19 +170,16 @@ class BIP44Derivation {
   // Funciones de hash criptografico
   // ============================================================
 
-  /// Calcula SHA-256 de un mensaje (usado en checksums y direcciones)
   static Uint8List sha256(Uint8List data) {
     final hasher = SHA256Digest();
     return hasher.process(data);
   }
 
-  /// Calcula RIPEMD-160 de un mensaje (usado en direcciones Bitcoin)
   static Uint8List ripemd160(Uint8List data) {
     final hasher = RIPEMD160Digest();
     return hasher.process(data);
   }
 
-  /// Calcula Keccak-256 de un mensaje (usado en direcciones Ethereum/BNB Chain)
   static Uint8List keccak256(Uint8List data) {
     final hasher = KeccakDigest(256);
     return hasher.process(data);

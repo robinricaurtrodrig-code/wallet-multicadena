@@ -1,11 +1,19 @@
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:pointycastle/export.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SecureStorage {
-  static const _storage = FlutterSecureStorage();
+  static final bool _isWeb = kIsWeb;
+
+  static Future<SharedPreferences> get _webStorage async {
+    return SharedPreferences.getInstance();
+  }
+
+  static const FlutterSecureStorage _nativeStorage = FlutterSecureStorage();
 
   // Prefijo para claves por usuario (se asigna en login)
   static String _userPrefix = '';
@@ -38,20 +46,64 @@ class SecureStorage {
   }
 
   // ============================================================
+  // Helpers de almacenamiento multi-plataforma
+  // ============================================================
+
+  static Future<void> _write(String key, String value) async {
+    if (_isWeb) {
+      final prefs = await _webStorage;
+      await prefs.setString(key, value);
+    } else {
+      await _nativeStorage.write(key: key, value: value);
+    }
+  }
+
+  static Future<String?> _read(String key) async {
+    if (_isWeb) {
+      final prefs = await _webStorage;
+      return prefs.getString(key);
+    } else {
+      return await _nativeStorage.read(key: key);
+    }
+  }
+
+  static Future<bool> _has(String key) async {
+    final value = await _read(key);
+    return value != null && value.isNotEmpty;
+  }
+
+  static Future<void> _delete(String key) async {
+    if (_isWeb) {
+      final prefs = await _webStorage;
+      await prefs.remove(key);
+    } else {
+      await _nativeStorage.delete(key: key);
+    }
+  }
+
+  static Future<void> _deleteAll() async {
+    if (_isWeb) {
+      final prefs = await _webStorage;
+      await prefs.clear();
+    } else {
+      await _nativeStorage.deleteAll();
+    }
+  }
+
+  // ============================================================
   // Frase semilla cifrada
   // ============================================================
 
   static Future<void> saveEncryptedSeed(String encryptedSeed) async {
-    await _storage.write(key: _seedKey, value: encryptedSeed);
+    await _write(_seedKey, encryptedSeed);
   }
 
   static Future<String?> getEncryptedSeed() async {
-    return await _storage.read(key: _seedKey);
+    return await _read(_seedKey);
   }
 
   static Future<bool> hasSeed() async {
-    final seed = await _storage.read(key: _seedKey);
-    return seed != null && seed.isNotEmpty;
+    return await _has(_seedKey);
   }
 
   // ============================================================
@@ -69,12 +121,12 @@ class SecureStorage {
       'bitcoin': bitcoin,
       'bnb': bnb,
     });
-    await _storage.write(key: _addressesKey, value: addresses);
+    await _write(_addressesKey, addresses);
   }
 
   /// Obtiene las direcciones guardadas
   static Future<Map<String, String>?> getAddresses() async {
-    final raw = await _storage.read(key: _addressesKey);
+    final raw = await _read(_addressesKey);
     if (raw == null) return null;
     final decoded = json.decode(raw) as Map<String, dynamic>;
     return {
@@ -92,21 +144,20 @@ class SecureStorage {
   static Future<void> savePin(String pin) async {
     final salt = _generateSalt();
     final hash = _hashPin(pin, salt);
-    await _storage.write(key: _pinHashKey, value: hash);
-    await _storage.write(key: _pinSaltKey, value: salt);
+    await _write(_pinHashKey, hash);
+    await _write(_pinSaltKey, salt);
   }
 
   /// Verifica si el PIN ingresado es correcto
   static Future<bool> verifyPin(String pin) async {
-    final savedHash = await _storage.read(key: _pinHashKey);
-    final salt = await _storage.read(key: _pinSaltKey);
+    final savedHash = await _read(_pinHashKey);
+    final salt = await _read(_pinSaltKey);
     if (savedHash == null || salt == null) return false;
     return _hashPin(pin, salt) == savedHash;
   }
 
   static Future<bool> hasPin() async {
-    final pin = await _storage.read(key: _pinHashKey);
-    return pin != null && pin.isNotEmpty;
+    return await _has(_pinHashKey);
   }
 
   /// Genera un hash PBKDF2 del PIN con el salt proporcionado
@@ -129,11 +180,11 @@ class SecureStorage {
   // ============================================================
 
   static Future<void> setBiometricEnabled(bool enabled) async {
-    await _storage.write(key: _biometricKey, value: enabled.toString());
+    await _write(_biometricKey, enabled.toString());
   }
 
   static Future<bool> isBiometricEnabled() async {
-    final value = await _storage.read(key: _biometricKey);
+    final value = await _read(_biometricKey);
     return value == 'true';
   }
 
@@ -143,17 +194,16 @@ class SecureStorage {
 
   /// Guarda el codigo anti-phishing del usuario
   static Future<void> saveAntiPhishingCode(String code) async {
-    await _storage.write(key: _antiPhishingKey, value: code);
+    await _write(_antiPhishingKey, code);
   }
 
   /// Obtiene el codigo anti-phishing guardado
   static Future<String?> getAntiPhishingCode() async {
-    return await _storage.read(key: _antiPhishingKey);
+    return await _read(_antiPhishingKey);
   }
 
   static Future<bool> hasAntiPhishingCode() async {
-    final code = await _storage.read(key: _antiPhishingKey);
-    return code != null && code.isNotEmpty;
+    return await _has(_antiPhishingKey);
   }
 
   // ============================================================
@@ -162,12 +212,12 @@ class SecureStorage {
 
   /// Guarda el tiempo de inactividad antes de bloquear (minutos)
   static Future<void> saveAutoLogoutMinutes(int minutes) async {
-    await _storage.write(key: _autoLogoutKey, value: minutes.toString());
+    await _write(_autoLogoutKey, minutes.toString());
   }
 
   /// Obtiene el tiempo de inactividad configurado (default: 5 min)
   static Future<int> getAutoLogoutMinutes() async {
-    final value = await _storage.read(key: _autoLogoutKey);
+    final value = await _read(_autoLogoutKey);
     if (value == null) return 5;
     return int.tryParse(value) ?? 5;
   }
@@ -178,17 +228,17 @@ class SecureStorage {
 
   /// Elimina SOLO los datos del usuario actual
   static Future<void> clearUserData() async {
-    await _storage.delete(key: _seedKey);
-    await _storage.delete(key: _pinHashKey);
-    await _storage.delete(key: _pinSaltKey);
-    await _storage.delete(key: _biometricKey);
-    await _storage.delete(key: _addressesKey);
-    await _storage.delete(key: _antiPhishingKey);
-    await _storage.delete(key: _autoLogoutKey);
+    await _delete(_seedKey);
+    await _delete(_pinHashKey);
+    await _delete(_pinSaltKey);
+    await _delete(_biometricKey);
+    await _delete(_addressesKey);
+    await _delete(_antiPhishingKey);
+    await _delete(_autoLogoutKey);
   }
 
   /// Elimina TODOS los datos almacenados
   static Future<void> clearAll() async {
-    await _storage.deleteAll();
+    await _deleteAll();
   }
 }

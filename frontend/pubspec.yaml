@@ -28,15 +28,17 @@ dependencies:
 
   # Storage
   flutter_secure_storage: ^9.0.0
+  shared_preferences: ^2.2.2
 
   # Crypto
   bip39: ^1.0.6
   bip32: ^2.0.0
-  ed25519_hd_key: ^2.2.0
   pointycastle: ^3.7.3
   hex: ^0.2.0
   convert: ^3.1.1
   cryptography: ^2.7.0
+  crypto: ^3.0.2
+  ed25519_hd_key: ^2.3.0
 
   # UI
   qr_flutter: ^4.1.0

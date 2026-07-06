@@ -12,7 +12,7 @@ enum AuthStatus { uninitialized, authenticated, unauthenticated, loading }
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
-  final ApiService _apiService = ApiService();
+  final ApiService apiService;
   Timer? _tokenRefreshTimer;
 
   AuthStatus _status = AuthStatus.uninitialized;
@@ -24,7 +24,7 @@ class AuthProvider extends ChangeNotifier {
   String? get error => _error;
   bool get isAuthenticated => _status == AuthStatus.authenticated;
 
-  AuthProvider() {
+  AuthProvider({required this.apiService}) {
     _authService.userStream.listen(_onAuthChange);
   }
 
@@ -33,7 +33,7 @@ class AuthProvider extends ChangeNotifier {
     if (firebaseUser == null) {
       _status = AuthStatus.unauthenticated;
       _user = null;
-      _apiService.setToken(null);
+      apiService.setToken(null);
       notifyListeners();
     } else {
       // Usuario ya autenticado (ej. al reabrir la app con sesion activa)
@@ -46,7 +46,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       // Obtener el token JWT de Firebase Auth
       final token = await firebaseUser.getIdToken();
-      _apiService.setToken(token);
+      apiService.setToken(token);
 
       // Configurar el prefijo de usuario para SecureStorage (almacenamiento por usuario)
       SecureStorage.setUserId(firebaseUser.uid);
@@ -84,7 +84,7 @@ class AuthProvider extends ChangeNotifier {
     _tokenRefreshTimer = Timer.periodic(const Duration(minutes: 45), (_) async {
       try {
         final token = await firebaseUser.getIdToken(true);
-        _apiService.setToken(token);
+        apiService.setToken(token);
       } catch (_) {}
     });
   }
@@ -139,7 +139,7 @@ class AuthProvider extends ChangeNotifier {
     await _authService.logout();
     _status = AuthStatus.unauthenticated;
     _user = null;
-    _apiService.setToken(null);
+    apiService.setToken(null);
     SecureStorage.clearUserId();
     notifyListeners();
   }

@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../models/wallet.dart';
 import '../../providers/wallet_provider.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/connectivity_provider.dart';
 import '../../services/api_service.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -16,42 +18,118 @@ class _HistoryScreenState extends State<HistoryScreen> {
   String _selectedNetwork = 'solana';
   List<Transaction> _transactions = [];
   bool _isLoading = false;
+  bool _isLoadingMore = false;
   String? _error;
+  int _loadId = 0;
+  int _page = 0;
+  bool _hasMore = true;
+  static const int _pageSize = 20;
+  final ScrollController _scrollController = ScrollController();
+  ApiService? _api;
 
   @override
   void initState() {
     super.initState();
-    _loadHistory();
+    _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _api = context.read<AuthProvider>().apiService;
+      _loadHistory();
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      if (!_isLoadingMore && _hasMore) {
+        _loadMore();
+      }
+    }
   }
 
   Future<void> _loadHistory({String? network}) async {
-    final wallet = context.read<WalletProvider>();
     final net = network ?? _selectedNetwork;
 
+    final currentLoadId = ++_loadId;
+    _page = 0;
+    _hasMore = true;
+
+    if (!mounted) return;
     setState(() {
       _isLoading = true;
       _error = null;
+      _transactions = [];
     });
 
-    try {
-      final address = _getAddressForNetwork(net, wallet);
-      if (address == null) {
+    await _fetchTransactions(net, currentLoadId, 0);
+  }
+
+  Future<void> _loadMore() async {
+    final currentLoadId = _loadId;
+
+    if (!mounted) return;
+    setState(() => _isLoadingMore = true);
+
+    await _fetchTransactions(_selectedNetwork, currentLoadId, _page + 1);
+  }
+
+  Future<void> _fetchTransactions(String net, int loadId, int page) async {
+    if (_api == null) {
+      if (mounted && loadId == _loadId) {
+        setState(() {
+          _error = 'Servicio de API no disponible';
+          _isLoading = false;
+          _isLoadingMore = false;
+        });
+      }
+      return;
+    }
+
+    final wallet = context.read<WalletProvider>();
+    final address = _getAddressForNetwork(net, wallet);
+
+    if (address == null) {
+      if (mounted && loadId == _loadId) {
         setState(() {
           _transactions = [];
           _isLoading = false;
+          _isLoadingMore = false;
         });
-        return;
       }
-      final api = ApiService();
-      final txs = await api.getHistory(address, net);
+      return;
+    }
+
+    try {
+      final txs = await _api!.getHistory(address, net);
+
+      if (!mounted || loadId != _loadId) return;
+
+      final hasMore = txs.length >= _pageSize;
       setState(() {
-        _transactions = txs;
+        if (page == 0) {
+          _transactions = txs;
+        } else {
+          _transactions.addAll(txs);
+        }
+        _page = page;
+        _hasMore = hasMore;
         _isLoading = false;
+        _isLoadingMore = false;
       });
     } catch (e) {
+      if (!mounted || loadId != _loadId) return;
       setState(() {
-        _error = 'Error al cargar historial: $e';
+        if (page == 0) {
+          _error = 'Error al cargar historial: $e';
+        }
         _isLoading = false;
+        _isLoadingMore = false;
       });
     }
   }
@@ -67,6 +145,32 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final connectivity = context.watch<ConnectivityProvider>();
+
+    if (!connectivity.isOnline) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Historial de transacciones')),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.wifi_off, size: 64, color: AppTheme.textDarkSecondary),
+              const SizedBox(height: 16),
+              Text(
+                'Sin conexion a internet',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Conectate a internet para ver tu historial',
+                style: TextStyle(color: AppTheme.textDarkSecondary),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Historial de transacciones'),
@@ -154,9 +258,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return RefreshIndicator(
       onRefresh: () => _loadHistory(),
       child: ListView.builder(
+        controller: _scrollController,
         padding: const EdgeInsets.all(16),
-        itemCount: _transactions.length,
-        itemBuilder: (_, i) => _buildTransactionItem(_transactions[i]),
+        itemCount: _transactions.length + (_hasMore ? 1 : 0),
+        itemBuilder: (_, i) {
+          if (i == _transactions.length) {
+            return const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+            );
+          }
+          return _buildTransactionItem(_transactions[i]);
+        },
       ),
     );
   }

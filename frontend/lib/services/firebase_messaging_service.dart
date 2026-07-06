@@ -1,11 +1,13 @@
 // FirebaseMessagingService: maneja tokens FCM y notificaciones push
 
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class FirebaseMessagingService {
-  static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+  static final bool _isWeb = kIsWeb;
 
+  static FirebaseMessaging? _messaging;
   static String? _currentToken;
   static String? get currentToken => _currentToken;
 
@@ -13,7 +15,9 @@ class FirebaseMessagingService {
 
   /// Inicializa FCM con un GlobalKey de navegacion para redirigir al tocar
   static Future<void> init(GlobalKey<NavigatorState> navKey) async {
+    if (_isWeb) return;
     navigatorKey = navKey;
+    _messaging = FirebaseMessaging.instance;
     await _requestPermission();
     await _getToken();
     _listenTokenRefresh();
@@ -23,7 +27,7 @@ class FirebaseMessagingService {
 
   /// Solicita permiso al usuario para mostrar notificaciones
   static Future<void> _requestPermission() async {
-    final status = await _messaging.requestPermission(
+    final status = await _messaging!.requestPermission(
       alert: true,
       badge: true,
       sound: true,
@@ -35,13 +39,13 @@ class FirebaseMessagingService {
 
   /// Obtiene el token FCM actual del dispositivo
   static Future<void> _getToken() async {
-    _currentToken = await _messaging.getToken();
+    _currentToken = await _messaging!.getToken();
     debugPrint('FCM token: $_currentToken');
   }
 
   /// Escucha cambios en el token FCM (se refresca periodicamente)
   static void _listenTokenRefresh() {
-    _messaging.onTokenRefresh.listen((token) {
+    _messaging!.onTokenRefresh.listen((token) {
       _currentToken = token;
       debugPrint('FCM token refrescado: $token');
     });
@@ -85,7 +89,6 @@ class FirebaseMessagingService {
     if (context == null) return;
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     debugPrint('Abrir detalle de tx: $txHash');
-    // TODO: Navegar a pantalla de detalle de transaccion
   }
 
   /// Maneja mensajes en foreground: muestra SnackBar

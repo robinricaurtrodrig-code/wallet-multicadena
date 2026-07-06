@@ -1,15 +1,18 @@
 // BiometricService: autenticacion por huella/Face ID
 
-import 'package:local_auth/local_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:local_auth/local_auth.dart';
 
 class BiometricService {
-  static final LocalAuthentication _auth = LocalAuthentication();
+  static final bool _isWeb = kIsWeb;
 
   /// Verifica si el dispositivo soporta autenticacion biometrica
   static Future<bool> isAvailable() async {
+    if (_isWeb) return false;
     try {
-      return await _auth.canCheckBiometrics || await _auth.isDeviceSupported();
+      final auth = LocalAuthentication();
+      return await auth.canCheckBiometrics || await auth.isDeviceSupported();
     } catch (e) {
       return false;
     }
@@ -17,8 +20,10 @@ class BiometricService {
 
   /// Obtiene los tipos biometricos disponibles (huella, Face ID, etc.)
   static Future<List<BiometricType>> getAvailableBiometrics() async {
+    if (_isWeb) return [];
     try {
-      return await _auth.getAvailableBiometrics();
+      final auth = LocalAuthentication();
+      return await auth.getAvailableBiometrics();
     } catch (e) {
       return [];
     }
@@ -29,8 +34,10 @@ class BiometricService {
   static Future<bool> authenticate({
     String reason = 'Autenticacion requerida para acceder a la wallet',
   }) async {
+    if (_isWeb) return false;
     try {
-      return await _auth.authenticate(
+      final auth = LocalAuthentication();
+      return await auth.authenticate(
         localizedReason: reason,
         options: const AuthenticationOptions(
           stickyAuth: true,

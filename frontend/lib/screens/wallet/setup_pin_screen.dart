@@ -37,18 +37,21 @@ class _SetupPinScreenState extends State<SetupPinScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final wallet = context.read<WalletProvider>();
-    final seedPhrase = wallet.seedPhrase;
-
-    if (seedPhrase == null || seedPhrase.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error: No hay frase semilla disponible')),
-      );
-      return;
-    }
 
     try {
-      // Guardar la wallet con la contrasena ingresada
-      await wallet.saveWallet(seedPhrase, _passwordCtrl.text);
+      // Si la wallet aun no se ha guardado (flujo de creacion), guardarla ahora
+      if (!wallet.hasWallet) {
+        final seedPhrase = wallet.seedPhrase;
+        if (seedPhrase == null || seedPhrase.isEmpty) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Error: No hay frase semilla disponible')),
+            );
+          }
+          return;
+        }
+        await wallet.saveWallet(seedPhrase, _passwordCtrl.text);
+      }
 
       // Si el usuario configuro un PIN, guardarlo de forma segura (hasheado)
       if (!_skipPin && _pinCtrl.text.isNotEmpty) {
@@ -59,8 +62,6 @@ class _SetupPinScreenState extends State<SetupPinScreen> {
       if (_biometricEnabled) {
         await SecureStorage.setBiometricEnabled(true);
       }
-
-
 
       // Navegar a la pantalla principal (home)
       if (mounted) {

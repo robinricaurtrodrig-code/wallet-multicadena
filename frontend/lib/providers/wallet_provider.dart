@@ -19,7 +19,9 @@ import '../core/storage/secure_storage.dart';
 /// y consulta de balances/precios para las 3 redes (Solana, Bitcoin, BNB)
 ///
 class WalletProvider extends ChangeNotifier {
-  final ApiService _apiService = ApiService();
+  final ApiService apiService;
+
+  WalletProvider({required this.apiService});
 
   bool _isLoading = false;
   String? _error;
@@ -267,7 +269,7 @@ class WalletProvider extends ChangeNotifier {
   ///
   Future<WalletInfo?> _fetchSingleBalance(String network, String address) async {
     try {
-      return await _apiService.getBalance(network, address);
+      return await apiService.getBalance(network, address);
     } catch (e) {
       debugPrint('Error al obtener balance de $network: $e');
       return WalletInfo(
@@ -312,7 +314,7 @@ class WalletProvider extends ChangeNotifier {
   ///
   Future<void> fetchPrices() async {
     try {
-      _prices = await _apiService.getPrices();
+      _prices = await apiService.getPrices();
       notifyListeners();
     } catch (e) {
       _error = 'Error al obtener precios: $e';
@@ -327,7 +329,7 @@ class WalletProvider extends ChangeNotifier {
     if (address == null) return;
 
     try {
-      final txs = await _apiService.getHistory(address, network);
+      final txs = await apiService.getHistory(address, network);
       _recentTransactions = txs;
       notifyListeners();
     } catch (e) {
@@ -382,6 +384,7 @@ class WalletProvider extends ChangeNotifier {
       }
       _encryptedSeed = await SecureStorage.getEncryptedSeed();
     }
+    notifyListeners();
     return hasSeed;
   }
 
@@ -442,7 +445,7 @@ class WalletProvider extends ChangeNotifier {
       if (fromAddress == null) throw Exception('Direccion no encontrada para $network');
 
       // 1. Preparar transaccion (obtener datos de la red)
-      final prepared = await _apiService.prepareTransaction(
+      final prepared = await apiService.prepareTransaction(
         network: network,
         fromAddress: fromAddress,
         toAddress: toAddress,
@@ -488,7 +491,7 @@ class WalletProvider extends ChangeNotifier {
       }
 
       // 3. Retransmitir la transaccion firmada
-      final tx = await _apiService.sendTransaction(
+      final tx = await apiService.sendTransaction(
         network: network,
         toAddress: toAddress,
         amount: amount,
