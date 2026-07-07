@@ -37,6 +37,7 @@ app.add_middleware(
         "https://wallet-multicadena.firebaseapp.com",
         "http://localhost:8000",
         "http://localhost:3000",
+        "https://wallet-multicadena-production.up.railway.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
