@@ -1,6 +1,10 @@
 import httpx
+import asyncio
+import logging
 from app.config import get_settings
 from .base import BlockchainService
+
+logger = logging.getLogger(__name__)
 
 
 class SolanaService(BlockchainService):
@@ -9,15 +13,23 @@ class SolanaService(BlockchainService):
     def __init__(self):
         self.rpc_url = get_settings().solana_rpc_url
 
-    async def _rpc_call(self, method: str, params: list) -> dict:
-        """Ejecuta una llamada JSON-RPC a la red Solana de forma asincrona"""
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                self.rpc_url,
-                json={"jsonrpc": "2.0", "id": 1, "method": method, "params": params},
-            )
-            response.raise_for_status()
-            return response.json()
+    async def _rpc_call(self, method: str, params: list, retries: int = 2) -> dict:
+        """Ejecuta una llamada JSON-RPC a la red Solana de forma asincrona con retry"""
+        for attempt in range(retries + 1):
+            try:
+                async with httpx.AsyncClient(timeout=httpx.Timeout(15.0)) as client:
+                    response = await client.post(
+                        self.rpc_url,
+                        json={"jsonrpc": "2.0", "id": 1, "method": method, "params": params},
+                    )
+                    response.raise_for_status()
+                    return response.json()
+            except Exception as e:
+                logger.warning(f"Solana RPC call failed (attempt {attempt+1}/{retries+1}): {e}")
+                if attempt < retries:
+                    await asyncio.sleep(1)
+                else:
+                    return {"error": {"message": str(e)}}
 
     async def get_balance(self, address: str) -> float:
         """Obtiene el balance de SOL en lamports y lo convierte a SOL (1 SOL = 10^9 lamports)"""
@@ -55,13 +67,13 @@ class SolanaService(BlockchainService):
 
     async def get_transaction_history(self, address: str, limit: int = 50) -> list[dict]:
         """Obtiene el historial de transacciones con detalles completos (monto, comision)"""
-        # Primero obtener las firmas de transacciones asociadas a la direccion
         sig_result = await self._rpc_call("getSignaturesForAddress", [
             address,
             {"limit": min(limit, 1000)},
         ])
         if "error" in sig_result:
-            raise Exception(sig_result["error"]["message"])
+            logger.error(f"Solana history error for {address}: {sig_result['error']}")
+            return []
 
         signatures = sig_result.get("result", [])
         transactions = []

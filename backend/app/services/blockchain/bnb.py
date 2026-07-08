@@ -1,6 +1,10 @@
 import httpx
+import asyncio
+import logging
 from app.config import get_settings
 from .base import BlockchainService
+
+logger = logging.getLogger(__name__)
 
 
 class BNBService(BlockchainService):
@@ -9,15 +13,23 @@ class BNBService(BlockchainService):
     def __init__(self):
         self.rpc_url = get_settings().bnb_rpc_url
 
-    async def _rpc_call(self, method: str, params: list) -> dict:
-        """Ejecuta una llamada JSON-RPC a la red BNB Chain de forma asincrona"""
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                self.rpc_url,
-                json={"jsonrpc": "2.0", "id": 1, "method": method, "params": params},
-            )
-            response.raise_for_status()
-            return response.json()
+    async def _rpc_call(self, method: str, params: list, retries: int = 2) -> dict:
+        """Ejecuta una llamada JSON-RPC a la red BNB Chain de forma asincrona con retry"""
+        for attempt in range(retries + 1):
+            try:
+                async with httpx.AsyncClient(timeout=httpx.Timeout(15.0)) as client:
+                    response = await client.post(
+                        self.rpc_url,
+                        json={"jsonrpc": "2.0", "id": 1, "method": method, "params": params},
+                    )
+                    response.raise_for_status()
+                    return response.json()
+            except Exception as e:
+                logger.warning(f"BNB RPC call failed (attempt {attempt+1}/{retries+1}): {e}")
+                if attempt < retries:
+                    await asyncio.sleep(1)
+                else:
+                    return {"error": {"message": str(e)}}
 
     async def get_balance(self, address: str) -> float:
         """Obtiene el balance de BNB en wei y lo convierte a BNB (1 BNB = 10^18 wei)"""
@@ -61,8 +73,10 @@ class BNBService(BlockchainService):
         """Obtiene el historial de transacciones escaneando bloques recientes via JSON-RPC batch"""
         address_lower = address.lower()
 
-        # Obtener el bloque actual
         block_result = await self._rpc_call("eth_blockNumber", [])
+        if "error" in block_result:
+            logger.error(f"BNB history error: {block_result['error']}")
+            return []
         current_block = int(block_result.get("result", "0x0"), 16)
 
         transactions = []
