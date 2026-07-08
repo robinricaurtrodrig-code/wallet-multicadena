@@ -22,6 +22,13 @@ class Settings(BaseSettings):
     bitcoin_rpc_url: str = "https://mempool.space/api"
     bnb_rpc_url: str = "https://bsc-dataseed.binance.org"
 
+    # Email del administrador para notificaciones de nuevos registros
+    admin_email: str = ""
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+
     # API de precios (CoinGecko)
     coingecko_api_url: str = "https://api.coingecko.com/api/v3"
 

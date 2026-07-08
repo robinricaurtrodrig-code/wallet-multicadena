@@ -15,6 +15,7 @@ from app.services.firebase import (
     verify_id_token,
 )
 from app.utils.security import limiter, hash_device_id
+from app.utils.notifications import send_admin_notification
 from fastapi import Request
 from google.cloud import firestore
 import firebase_admin.auth
@@ -70,6 +71,12 @@ async def register(request: Request, body: AuthRegisterRequest):
     }
     db.collection("SETTINGS").document(uid).set(settings_data)
 
+    # Notificar al administrador sobre el nuevo registro
+    send_admin_notification(
+        subject=f"Nuevo registro en Wallet Multicadena: {body.username}",
+        body=f"Usuario: {body.username}\nEmail: {body.email}\nUID: {uid}\nFecha: {firestore.SERVER_TIMESTAMP}",
+    )
+
     # Generar token JWT personalizado de Firebase
     token = firebase_admin.auth.create_custom_token(uid)
 
@@ -97,6 +104,12 @@ async def login(request: Request, body: AuthLoginRequestV2):
     db = get_firestore_client()
     user_doc = db.collection("USERS").document(uid).get()
     user_data = user_doc.to_dict() if user_doc.exists else {}
+
+    # Notificar al administrador sobre el inicio de sesion
+    send_admin_notification(
+        subject=f"Inicio de sesion: {user_data.get('username', 'Desconocido')}",
+        body=f"Usuario: {user_data.get('username', 'Desconocido')}\nEmail: {user_data.get('email', '')}\nUID: {uid}\nDispositivo: {body.device_id or 'No especificado'}\nFecha: {firestore.SERVER_TIMESTAMP}",
+    )
 
     # Registrar la sesion en Firestore (coleccion SESSION)
     session_data = {
