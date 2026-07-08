@@ -15,7 +15,7 @@ from app.services.firebase import (
     verify_id_token,
 )
 from app.utils.security import limiter, hash_device_id
-from app.utils.notifications import send_admin_notification
+from app.utils.notifications import send_email
 from fastapi import Request
 from google.cloud import firestore
 import firebase_admin.auth
@@ -71,10 +71,11 @@ async def register(request: Request, body: AuthRegisterRequest):
     }
     db.collection("SETTINGS").document(uid).set(settings_data)
 
-    # Notificar al administrador sobre el nuevo registro
-    send_admin_notification(
-        subject=f"Nuevo registro en Wallet Multicadena: {body.username}",
-        body=f"Usuario: {body.username}\nEmail: {body.email}\nUID: {uid}\nFecha: {firestore.SERVER_TIMESTAMP}",
+    # Enviar correo de bienvenida al usuario
+    send_email(
+        to_email=body.email,
+        subject="Bienvenido a Wallet Multicadena",
+        body=f"Hola {body.username},\n\nTu cuenta ha sido creada exitosamente en Wallet Multicadena.\n\nYa puedes iniciar sesion y crear tu wallet para enviar y recibir SOL, BTC y BNB.\n\nGracias por confiar en nosotros.",
     )
 
     # Generar token JWT personalizado de Firebase
@@ -105,10 +106,11 @@ async def login(request: Request, body: AuthLoginRequestV2):
     user_doc = db.collection("USERS").document(uid).get()
     user_data = user_doc.to_dict() if user_doc.exists else {}
 
-    # Notificar al administrador sobre el inicio de sesion
-    send_admin_notification(
-        subject=f"Inicio de sesion: {user_data.get('username', 'Desconocido')}",
-        body=f"Usuario: {user_data.get('username', 'Desconocido')}\nEmail: {user_data.get('email', '')}\nUID: {uid}\nDispositivo: {body.device_id or 'No especificado'}\nFecha: {firestore.SERVER_TIMESTAMP}",
+    # Enviar alerta de inicio de sesion al usuario
+    send_email(
+        to_email=user_data.get("email", ""),
+        subject="Inicio de sesion en Wallet Multicadena",
+        body=f"Hola {user_data.get('username', 'Usuario')},\n\nSe ha iniciado sesion en tu cuenta de Wallet Multicadena.\n\nSi fuiste tu, ignora este mensaje.\nSi NO fuiste tu, cambia tu contrasena inmediatamente.",
     )
 
     # Registrar la sesion en Firestore (coleccion SESSION)

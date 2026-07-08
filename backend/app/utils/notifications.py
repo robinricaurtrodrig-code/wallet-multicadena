@@ -7,17 +7,17 @@ from app.config import get_settings
 logger = logging.getLogger(__name__)
 
 
-def send_admin_notification(subject: str, body: str):
-    """Envia un correo al administrador si SMTP esta configurado"""
+def send_email(to_email: str, subject: str, body: str):
+    """Envia un correo electronico si SMTP esta configurado"""
     settings = get_settings()
-    if not settings.admin_email or not settings.smtp_user or not settings.smtp_password:
-        logger.info(f"Notificacion omitida (SMTP no configurado): {subject} - {body}")
+    if not settings.smtp_user or not settings.smtp_password:
+        logger.info(f"Correo omitido (SMTP no configurado): {subject} -> {to_email}")
         return
 
     try:
         msg = MIMEMultipart()
         msg["From"] = settings.smtp_user
-        msg["To"] = settings.admin_email
+        msg["To"] = to_email
         msg["Subject"] = subject
         msg.attach(MIMEText(body, "plain", "utf-8"))
 
@@ -26,6 +26,6 @@ def send_admin_notification(subject: str, body: str):
             server.login(settings.smtp_user, settings.smtp_password)
             server.send_message(msg)
 
-        logger.info(f"Notificacion enviada a {settings.admin_email}: {subject}")
+        logger.info(f"Correo enviado a {to_email}: {subject}")
     except Exception as e:
-        logger.warning(f"Error al enviar notificacion por correo: {e}")
+        logger.warning(f"Error al enviar correo a {to_email}: {e}")

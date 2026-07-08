@@ -22,8 +22,7 @@ class Settings(BaseSettings):
     bitcoin_rpc_url: str = "https://mempool.space/api"
     bnb_rpc_url: str = "https://bsc-dataseed.binance.org"
 
-    # Email del administrador para notificaciones de nuevos registros
-    admin_email: str = ""
+    # Configuracion SMTP para enviar correos a usuarios
     smtp_host: str = "smtp.gmail.com"
     smtp_port: int = 587
     smtp_user: str = ""
