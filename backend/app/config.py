@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from pydantic import field_validator
+from pydantic import field_validator, ValidationInfo
 from functools import lru_cache
 
 
@@ -39,9 +39,15 @@ class Settings(BaseSettings):
 
     @field_validator("solana_rpc_url", "solana_ws_url", "bitcoin_rpc_url", "bnb_rpc_url")
     @classmethod
-    def validate_rpc_url(cls, v):
+    def validate_rpc_url(cls, v: str, info: ValidationInfo):
+        defaults = {
+            "solana_rpc_url": "https://api.mainnet-beta.solana.com",
+            "solana_ws_url": "wss://api.mainnet-beta.solana.com",
+            "bitcoin_rpc_url": "https://mempool.space/api",
+            "bnb_rpc_url": "https://bsc-dataseed.binance.org",
+        }
         if not v or not v.startswith(("http://", "https://", "wss://")):
-            return cls.model_fields[v].default
+            return defaults[info.field_name]
         return v
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
