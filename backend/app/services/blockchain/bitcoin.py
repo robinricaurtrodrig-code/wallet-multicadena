@@ -1,3 +1,9 @@
+"""Servicio para interactuar con la red Bitcoin usando la API publica de Mempool.space.
+Implementa consulta de balance (confirmado + mempool), preparacion de transacciones
+con seleccion de UTXOs, envio de transacciones hex y obtencion de historial.
+Convierte entre satoshis y BTC (1 BTC = 10^8 satoshis).
+"""
+
 import httpx
 from app.config import get_settings
 from .base import BlockchainService
@@ -7,6 +13,7 @@ class BitcoinService(BlockchainService):
     """Servicio para interactuar con la red Bitcoin usando la API de Mempool.space"""
 
     def __init__(self):
+        """Inicializa el servicio con la URL base de la API de Mempool.space desde la configuracion."""
         self.api_url = get_settings().bitcoin_rpc_url
 
     async def get_balance(self, address: str) -> float:

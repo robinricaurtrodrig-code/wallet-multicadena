@@ -1,9 +1,17 @@
+"""Configuracion de la aplicacion usando pydantic-settings.
+Carga variables de entorno desde .env y las valida.
+Define endpoints RPC para blockchains, credenciales Firebase, SMTP y CoinGecko.
+"""
+
 from pydantic_settings import BaseSettings
 from pydantic import field_validator, ValidationInfo
 from functools import lru_cache
 
 
 class Settings(BaseSettings):
+    """Configuracion centralizada de la wallet multicadena.
+    Lee variables de entorno con tipado fuerte y validacion.
+    """
     # Configuracion de Firebase Admin SDK
     firebase_project_id: str = ""
     firebase_private_key_id: str = ""
@@ -39,6 +47,7 @@ class Settings(BaseSettings):
     @field_validator("firebase_project_id")
     @classmethod
     def validate_project_id(cls, v):
+        """Valida que el project_id de Firebase no este vacio."""
         if not v:
             raise ValueError("FIREBASE_PROJECT_ID es requerido")
         return v
@@ -46,6 +55,7 @@ class Settings(BaseSettings):
     @field_validator("solana_rpc_url", "solana_ws_url", "bitcoin_rpc_url", "bnb_rpc_url")
     @classmethod
     def validate_rpc_url(cls, v: str, info: ValidationInfo):
+        """Valida que las URLs RPC tengan formato correcto y asigna valores por defecto si son invalidas."""
         defaults = {
             "solana_rpc_url": "https://api.mainnet-beta.solana.com",
             "solana_ws_url": "wss://api.mainnet-beta.solana.com",
@@ -63,4 +73,5 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
+    """Retorna la instancia singleton de Settings con cache."""
     return Settings()

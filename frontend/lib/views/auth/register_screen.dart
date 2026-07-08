@@ -1,8 +1,11 @@
+/// RegisterScreen: Pantalla de registro de nuevo usuario
+/// Permite crear una cuenta con nombre de usuario, correo y contrasena
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/auth_provider.dart';
 import '../../config/theme.dart';
 
+/// Pantalla de registro con formulario de nombre, correo, contrasena y confirmacion
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -10,6 +13,7 @@ class RegisterScreen extends StatefulWidget {
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
+/// Estado del RegisterScreen: gestiona formulario de registro y validaciones
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
@@ -27,7 +31,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  /// Registra un nuevo usuario con los datos del formulario
+  /// Valida el formulario y registra un nuevo usuario con los datos ingresados
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
     await context.read<AuthProvider>().register(

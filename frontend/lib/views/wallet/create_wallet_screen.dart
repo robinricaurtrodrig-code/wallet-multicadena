@@ -1,3 +1,6 @@
+/// CreateWalletScreen: Pantalla que genera y muestra la frase semilla BIP39
+/// El usuario debe copiarla y guardarla de forma segura antes de continuar
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/wallet_provider.dart';
@@ -13,6 +16,7 @@ class CreateWalletScreen extends StatefulWidget {
   State<CreateWalletScreen> createState() => _CreateWalletScreenState();
 }
 
+/// Estado del CreateWalletScreen: genera frase semilla, controla revelacion y confirmacion
 class _CreateWalletScreenState extends State<CreateWalletScreen> {
   String? _seedPhrase;
   bool _revealed = false;

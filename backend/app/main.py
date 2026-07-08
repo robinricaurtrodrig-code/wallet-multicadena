@@ -11,7 +11,9 @@ import uvicorn
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Verificar que Firebase se inicializa correctamente al arrancar
+    """Manejador del ciclo de vida de la aplicacion.
+    Verifica que Firebase se inicializa correctamente al arrancar el servidor.
+    """
     try:
         get_firebase_app()
         print("Firebase inicializado correctamente")
@@ -51,6 +53,7 @@ app.include_router(transactions.router, prefix="/api/v1")
 
 @app.get("/")
 async def root():
+    """Endpoint raiz que retorna informacion basica de la API y las redes soportadas."""
     return {
         "app": "Wallet Multicadena API",
         "version": "1.0.0",
@@ -60,6 +63,8 @@ async def root():
 
 @app.get("/health")
 async def health():
+    """Endpoint de health check para monitoreo."""
+
     return {"status": "ok"}
 
 

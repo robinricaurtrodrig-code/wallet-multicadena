@@ -1,3 +1,6 @@
+/// LoginScreen: Pantalla de inicio de sesion de Wallet Multicadena
+/// Permite al usuario autenticarse con correo y contrasena,
+/// recuperar contrasena olvidada y navegar al registro
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/auth_provider.dart';
@@ -5,6 +8,7 @@ import '../../services/auth_service.dart';
 import 'register_screen.dart';
 import '../../config/theme.dart';
 
+/// Pantalla de inicio de sesion con formulario de correo y contrasena
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -12,6 +16,7 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
+/// Estado del LoginScreen: gestiona formulario, envio de credenciales y recuperacion de contrasena
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
@@ -26,6 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  /// Valida el formulario y ejecuta el inicio de sesion a traves de AuthProvider
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
     await context.read<AuthProvider>().login(
@@ -34,6 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  /// Envia un correo de recuperacion de contrasena al email ingresado
   Future<void> _resetPassword() async {
     final email = _emailCtrl.text.trim();
     if (email.isEmpty || !email.contains('@')) {

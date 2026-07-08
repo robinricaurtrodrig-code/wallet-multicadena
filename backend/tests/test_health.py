@@ -8,6 +8,7 @@ class TestRoot:
     """Verifica que el endpoint raiz retorne la info basica de la API"""
 
     def test_root_returns_app_info(self, client):
+        """Verifica que la raiz devuelva nombre, version y redes soportadas."""
         response = client.get("/")
         assert response.status_code == 200
         data = response.json()
@@ -19,6 +20,7 @@ class TestRoot:
         assert "bnb" in data["networks"]
 
     def test_root_version_is_string(self, client):
+        """Verifica que la version sea un string no vacio."""
         response = client.get("/")
         data = response.json()
         assert isinstance(data["version"], str)
@@ -29,10 +31,12 @@ class TestHealth:
     """Verifica que el endpoint de health retorne ok"""
 
     def test_health_returns_ok(self, client):
+        """Verifica que /health retorne status 200 y {"status": "ok"}."""
         response = client.get("/health")
         assert response.status_code == 200
         assert response.json() == {"status": "ok"}
 
     def test_health_is_json(self, client):
+        """Verifica que la respuesta de /health tenga Content-Type application/json."""
         response = client.get("/health")
         assert response.headers["content-type"] == "application/json"

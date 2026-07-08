@@ -1,3 +1,8 @@
+"""Utilidades de seguridad para la wallet multicadena.
+Incluye rate limiting por IP, hasheo de IDs de dispositivo,
+verificacion de tiempo de sesion y validacion contra URLs de phishing.
+"""
+
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from datetime import datetime, timedelta, timezone

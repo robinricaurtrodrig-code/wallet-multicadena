@@ -8,6 +8,13 @@ import '../services/firebase_messaging_service.dart';
 import '../models/user.dart';
 import '../core/storage/secure_storage.dart';
 
+///
+/// AuthProvider: Proveedor de estado para la autenticacion de usuarios.
+/// Gestiona registro, inicio de sesion, cierre de sesion, carga de datos
+/// de usuario desde Firestore, refresco periodico del token JWT de Firebase,
+/// y mapeo de errores de Firebase Auth a mensajes legibles para el usuario.
+///
+
 enum AuthStatus { uninitialized, authenticated, unauthenticated, loading }
 
 class AuthProvider extends ChangeNotifier {
@@ -24,13 +31,17 @@ class AuthProvider extends ChangeNotifier {
   String? get error => _error;
   bool get isAuthenticated => _status == AuthStatus.authenticated;
 
+  /// Inicializa el provider suscribiendose a los cambios de autenticacion de Firebase
   AuthProvider({required this.apiService}) {
     _authService.userStream.listen(_onAuthChange);
   }
 
   /// Escucha cambios en el estado de autenticacion de Firebase
+  /// Se dispara automaticamente al iniciar sesion, cerrar sesion o reabrir la app
+  /// Si firebaseUser es null, el usuario cerro sesion o su sesion expiro
   void _onAuthChange(fb_auth.User? firebaseUser) {
     if (firebaseUser == null) {
+      // Estado no autenticado: limpiar usuario y token de la API
       _status = AuthStatus.unauthenticated;
       _user = null;
       apiService.setToken(null);
@@ -58,6 +69,7 @@ class AuthProvider extends ChangeNotifier {
           .get();
 
       if (doc.exists) {
+        // Si el documento existe en Firestore, convertirlo al modelo de usuario
         _user = UserModel.fromJson(doc.data()!);
       } else {
         // Si no existe en Firestore, crear con datos minimos de Firebase Auth
@@ -71,8 +83,10 @@ class AuthProvider extends ChangeNotifier {
       }
 
       _status = AuthStatus.authenticated;
+      // Iniciar refresco periodico del token JWT cada 45 minutos
       _startTokenRefresh(firebaseUser);
     } catch (e) {
+      // Autenticado igual aunque falle Firestore, para no bloquear al usuario
       _status = AuthStatus.authenticated; // Autenticado igual aunque falle Firestore
     }
     notifyListeners();

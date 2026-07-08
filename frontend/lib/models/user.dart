@@ -1,3 +1,8 @@
+/// Modelos de datos de usuario y configuracion de la Wallet Multicadena.
+/// UserModel representa el perfil del usuario almacenado en Firestore.
+/// UserSettings almacena las preferencias del usuario (idioma, tema, moneda, notificaciones).
+
+/// Modelo que representa un usuario en la aplicacion.
 class UserModel {
   final String uid;
   final String email;
@@ -13,7 +18,8 @@ class UserModel {
     this.walletCreada = false,
   });
 
-  /// Construye un UserModel desde un mapa de Firestore
+  /// Construye un UserModel desde un mapa de Firestore.
+  /// Convierte el Timestamp de Firebase a DateTime para fechaRegistro.
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       uid: json['uid'] ?? '',
@@ -26,7 +32,7 @@ class UserModel {
     );
   }
 
-  /// Convierte el modelo a un mapa para guardar en Firestore
+  /// Convierte el modelo a un mapa para guardar en Firestore.
   Map<String, dynamic> toJson() {
     return {
       'uid': uid,
@@ -38,6 +44,7 @@ class UserModel {
   }
 }
 
+/// Modelo que representa las preferencias del usuario.
 class UserSettings {
   String idioma;
   String tema;
@@ -53,6 +60,8 @@ class UserSettings {
     this.tokensFavoritos = const [],
   });
 
+  /// Construye UserSettings desde un mapa de Firestore.
+  /// Usa valores por defecto si algun campo no existe.
   factory UserSettings.fromJson(Map<String, dynamic> json) {
     return UserSettings(
       idioma: json['idioma'] ?? 'es',
@@ -66,6 +75,7 @@ class UserSettings {
     );
   }
 
+  /// Convierte las preferencias a un mapa para guardar en Firestore.
   Map<String, dynamic> toJson() {
     return {
       'idioma': idioma,

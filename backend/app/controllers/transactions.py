@@ -1,3 +1,8 @@
+"""Controlador de operaciones blockchain de la wallet multicadena.
+Maneja consultas de balance, preparacion de transacciones, envio firmado
+e historial para las redes Solana, Bitcoin y BNB Chain.
+"""
+
 from fastapi import APIRouter, HTTPException, Depends
 from app.models.schemas import (
     BalancesResponse,
@@ -32,6 +37,12 @@ EXPLORER_URLS = {
 
 
 def get_service(network: Network):
+    """Retorna la instancia del servicio blockchain correspondiente a la red solicitada.
+    Parametros:
+        network: Enum Network (solana, bitcoin, bnb).
+    Retorna:
+        Instancia de SolanaService, BitcoinService o BNBService, o None si no es soportada.
+    """
     services = {
         Network.solana: SolanaService(),
         Network.bitcoin: BitcoinService(),
@@ -73,7 +84,14 @@ async def get_balance(
     address: str,
     user=Depends(get_current_user),
 ):
-    """Obtiene el balance de una red especifica para una direccion, con conversion a USD"""
+    """Obtiene el balance de una red especifica para una direccion, con conversion a USD.
+    Parametros:
+        network: Red blockchain (solana, bitcoin, bnb).
+        address: Direccion de la wallet en la red correspondiente.
+        user: Usuario autenticado (dependencia inyectada).
+    Retorna:
+        BalanceResponse con balance en moneda nativa, precio USD y balance convertido.
+    """
     prices = await get_usd_prices()
     symbol = {"solana": "SOL", "bitcoin": "BTC", "bnb": "BNB"}[network.value]
 
@@ -108,7 +126,14 @@ async def send_transaction(
     body: TransactionRequest,
     user=Depends(get_current_user),
 ):
-    """Retransmite una transaccion ya firmada a la red blockchain correspondiente"""
+    """Retransmite una transaccion ya firmada a la red blockchain correspondiente.
+    Envia la transaccion serializada al RPC de la red y notifica al usuario via FCM.
+    Parametros:
+        body: TransactionRequest con network, to_address, amount y signed_transaction.
+        user: Usuario autenticado (dependencia inyectada).
+    Retorna:
+        TransactionResponse con tx_hash, status, amount, fee y explorer_url.
+    """
     service = get_service(body.network)
     if not service:
         raise HTTPException(status_code=400, detail="Red no soportada")
@@ -150,8 +175,14 @@ async def prepare_send(
     body: PrepareSendRequest,
     user=Depends(get_current_user),
 ):
-    """Prepara los datos necesarios para que el frontend construya y firme una transaccion
-    Retorna informacion especifica de cada red (blockhash, UTXOs, nonce, etc.)
+    """Prepara los datos necesarios para que el frontend construya y firme una transaccion.
+    Retorna informacion especifica de cada red (blockhash para Solana, UTXOs para Bitcoin,
+    nonce/gas para BNB) necesaria para construir el mensaje a firmar.
+    Parametros:
+        body: PrepareSendRequest con network, from_address, to_address y amount.
+        user: Usuario autenticado (dependencia inyectada).
+    Retorna:
+        PrepareSendResponse con fee_estimate y preparation_data especifica de la red.
     """
     service = get_service(body.network)
     if not service:
@@ -187,7 +218,14 @@ async def get_history(
     network: Network,
     user=Depends(get_current_user),
 ):
-    """Obtiene el historial de transacciones con hash, monto, comision y estado"""
+    """Obtiene el historial de transacciones con hash, monto, comision y estado.
+    Parametros:
+        address: Direccion de la wallet a consultar.
+        network: Red blockchain (solana, bitcoin, bnb).
+        user: Usuario autenticado (dependencia inyectada).
+    Retorna:
+        Lista de TransactionHistoryItem con detalles de cada transaccion.
+    """
     service = get_service(network)
     if not service:
         raise HTTPException(status_code=400, detail="Red no soportada")

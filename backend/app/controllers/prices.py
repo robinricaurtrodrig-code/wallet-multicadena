@@ -1,3 +1,8 @@
+"""Controlador de precios de criptomonedas.
+Obtiene los precios actuales de SOL, BTC y BNB desde la API de CoinGecko
+con cache en memoria de 60 segundos para reducir llamadas externas.
+"""
+
 from fastapi import APIRouter
 from app.models.schemas import PriceResponse
 from app.utils.security import limiter

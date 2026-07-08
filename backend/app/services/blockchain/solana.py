@@ -1,3 +1,9 @@
+"""Servicio para interactuar con la red Solana mediante JSON-RPC.
+Implementa las operaciones de balance, preparacion de transacciones,
+envio firmado e historial usando los endpoints RPC de Solana.
+Convierte entre lamports y SOL (1 SOL = 10^9 lamports).
+"""
+
 import httpx
 import asyncio
 import logging
@@ -11,6 +17,7 @@ class SolanaService(BlockchainService):
     """Servicio para interactuar con la red Solana usando JSON-RPC"""
 
     def __init__(self):
+        """Inicializa el servicio con la URL del RPC de Solana desde la configuracion."""
         self.rpc_url = get_settings().solana_rpc_url
 
     async def _rpc_call(self, method: str, params: list, retries: int = 2) -> dict:

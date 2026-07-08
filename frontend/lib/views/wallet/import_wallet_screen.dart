@@ -1,3 +1,6 @@
+/// ImportWalletScreen: Pantalla para importar una wallet desde frase semilla BIP39
+/// Valida la seed phrase de 12 o 24 palabras, deriva direcciones BIP44 y cifra con AES-256
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/wallet_provider.dart';
@@ -14,6 +17,7 @@ class ImportWalletScreen extends StatefulWidget {
   State<ImportWalletScreen> createState() => _ImportWalletScreenState();
 }
 
+/// Estado del ImportWalletScreen: procesa la importacion validando frase BIP39 y contrasena
 class _ImportWalletScreenState extends State<ImportWalletScreen> {
   final _seedCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();

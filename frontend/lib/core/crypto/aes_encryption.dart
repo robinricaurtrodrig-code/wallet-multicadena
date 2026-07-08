@@ -1,14 +1,19 @@
+/// Cifrado simetrico AES-256-CBC con autenticacion HMAC-SHA256 (encrypt-then-MAC).
+/// Se usa para proteger la frase semilla cifrada antes de almacenarla en el dispositivo.
+/// La clave se deriva de una contrasena usando PBKDF2-HMAC-SHA256 con 600,000 iteraciones (OWASP 2024).
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:math';
 import 'package:pointycastle/export.dart';
 
+/// Clase que implementa el cifrado y descifrado AES-256-CBC con HMAC.
 class AESEncryption {
-  static const int keyLength = 32; // AES-256
+  static const int keyLength = 32; // AES-256: clave de 32 bytes (256 bits)
   static const int ivLength = 16;  // 128 bits para CBC
   static const int pbkdf2Iterations = 600000; // Iteraciones PBKDF2 (OWASP 2024)
 
-  /// Deriva una clave AES-256 a partir de una contrasena usando PBKDF2-HMAC-SHA256
+  /// Deriva una clave AES-256 a partir de una contrasena usando PBKDF2-HMAC-SHA256.
+  /// El salt garantiza que dos cifrados con la misma contrasena produzcan claves distintas.
   static Uint8List _deriveKey(String password, Uint8List salt) {
     final pbkdf2 = PBKDF2KeyDerivator(HMac(SHA256Digest(), 64));
     pbkdf2.init(Pbkdf2Parameters(salt, pbkdf2Iterations, keyLength));
@@ -16,20 +21,23 @@ class AESEncryption {
   }
 
   /// Genera bytes aleatorios criptograficamente seguros usando Random.secure()
+  /// Se usa para el salt y el vector de inicializacion (IV).
   static Uint8List _generateRandomBytes(int length) {
     final random = Random.secure();
     return Uint8List.fromList(List.generate(length, (_) => random.nextInt(256)));
   }
 
-  /// Calcula HMAC-SHA256 para autenticar el cifrado (encrypt-then-MAC)
+  /// Calcula HMAC-SHA256 para autenticar el cifrado (encrypt-then-MAC).
+  /// Esto permite detectar manipulaciones del ciphertext.
   static Uint8List _computeHmac(Uint8List key, Uint8List data) {
     final hmac = HMac(SHA256Digest(), 64);
     hmac.init(KeyParameter(key));
     return hmac.process(data);
   }
 
-  /// Cifra un texto plano con AES-256-CBC + HMAC-SHA256
-  /// Retorna: salt (16) + iv (16) + hmac (32) + ciphertext en base64
+  /// Cifra un texto plano con AES-256-CBC + HMAC-SHA256.
+  /// Retorna: salt (16) + iv (16) + hmac (32) + ciphertext en base64.
+  /// El formato empaquetado permite extraer todos los componentes al descifrar.
   static String encrypt(String plaintext, String password) {
     final salt = _generateRandomBytes(16);
     final iv = _generateRandomBytes(ivLength);
@@ -58,7 +66,9 @@ class AESEncryption {
     return base64.encode(result.toBytes());
   }
 
-  /// Descifra un texto cifrado con AES-256-CBC + HMAC-SHA256
+  /// Descifra un texto cifrado con AES-256-CBC + HMAC-SHA256.
+  /// Primero verifica la integridad mediante HMAC, luego descifra.
+  /// Si el HMAC no coincide, lanza una excepcion de integridad comprometida.
   static String decrypt(String ciphertext, String password) {
     final data = base64.decode(ciphertext);
     final salt = data.sublist(0, 16);
@@ -87,7 +97,8 @@ class AESEncryption {
     return utf8.decode(unpadded);
   }
 
-  /// Comparacion en tiempo constante para evitar timing attacks
+  /// Comparacion en tiempo constante para evitar timing attacks.
+  /// Siempre recorre TODOS los bytes, sin cortar en la primera discrepancia.
   static bool _constantTimeEquals(Uint8List a, Uint8List b) {
     if (a.length != b.length) return false;
     var result = 0;
@@ -97,7 +108,8 @@ class AESEncryption {
     return result == 0;
   }
 
-  /// Padding PKCS7: cada byte de relleno es igual al numero de bytes de relleno
+  /// Padding PKCS7: cada byte de relleno es igual al numero de bytes de relleno.
+  /// Garantiza que el texto plano tenga longitud multiplo de 16 (tamano de bloque AES).
   static Uint8List _pad(Uint8List data) {
     final padLength = 16 - (data.length % 16);
     final padded = Uint8List(data.length + padLength);
@@ -108,7 +120,8 @@ class AESEncryption {
     return padded;
   }
 
-  /// Remueve el padding PKCS7
+  /// Remueve el padding PKCS7.
+  /// Lee el ultimo byte para saber cuantos bytes de relleno eliminar.
   static Uint8List _unpad(Uint8List data) {
     final padLength = data.last;
     if (padLength < 1 || padLength > 16) {

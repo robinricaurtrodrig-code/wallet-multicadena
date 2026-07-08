@@ -1,5 +1,5 @@
-// SignMessageScreen: firma mensajes para autenticacion en DApps
-
+/// SignMessageScreen: Pantalla para firmar mensajes con clave privada
+/// Usado para autenticacion en DApps: firma mensajes en Solana, Bitcoin y BNB Chain
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -8,6 +8,7 @@ import '../../controllers/wallet_provider.dart';
 import '../../controllers/security_provider.dart';
 import '../../services/dapp_service.dart';
 
+/// Pantalla que permite firmar mensajes con la clave privada de la red seleccionada
 class SignMessageScreen extends StatefulWidget {
   const SignMessageScreen({super.key});
 
@@ -15,6 +16,7 @@ class SignMessageScreen extends StatefulWidget {
   State<SignMessageScreen> createState() => _SignMessageScreenState();
 }
 
+/// Estado del SignMessageScreen: maneja el mensaje, red, firma y copia del resultado
 class _SignMessageScreenState extends State<SignMessageScreen> {
   final _messageCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();

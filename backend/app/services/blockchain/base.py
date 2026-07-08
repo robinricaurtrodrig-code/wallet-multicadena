@@ -1,3 +1,8 @@
+"""Clase base abstracta para servicios blockchain.
+Define la interfaz comun que deben implementar Solana, Bitcoin y BNB Chain:
+balance, envio de transacciones, historial, preparacion y validacion de direcciones.
+"""
+
 from abc import ABC, abstractmethod
 
 

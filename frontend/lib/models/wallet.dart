@@ -1,4 +1,10 @@
-/// Modelo que representa la informacion de una wallet en una red especifica
+/// Modelos de datos para wallets, balances y transacciones de la Wallet Multicadena.
+/// Contiene tres clases principales:
+/// - WalletInfo: informacion de una wallet en una red especifica (balance, direccion, precio)
+/// - WalletData: agrupa los balances de todas las redes en un solo objeto
+/// - Transaction: representa una transaccion en la blockchain con sus detalles
+
+/// Modelo que representa la informacion de una wallet en una red especifica.
 class WalletInfo {
   final String address;   // Direccion publica de la wallet en la red
   final String network;   // Nombre de la red (solana, bitcoin, bnb)
@@ -16,7 +22,7 @@ class WalletInfo {
     this.usdPrice = 0,
   });
 
-  /// Construye un WalletInfo desde la respuesta JSON del backend
+  /// Construye un WalletInfo desde la respuesta JSON del backend.
   factory WalletInfo.fromJson(Map<String, dynamic> json) {
     return WalletInfo(
       address: json['address'] ?? '',
@@ -29,14 +35,16 @@ class WalletInfo {
   }
 }
 
-/// Modelo que agrupa los datos de todas las wallets del usuario
+/// Modelo que agrupa los datos de todas las wallets del usuario.
+/// Contiene la lista de WalletInfo (una por red) y el total combinado en USD.
 class WalletData {
   final List<WalletInfo> wallets; // Lista de wallets (una por red)
   final double totalUsd;          // Suma total de todos los balances en USD
 
   WalletData({required this.wallets, required this.totalUsd});
 
-  /// Construye WalletData desde la respuesta JSON del backend
+  /// Construye WalletData desde la respuesta JSON del backend.
+  /// El campo 'balances' contiene un arreglo de objetos WalletInfo.
   factory WalletData.fromJson(Map<String, dynamic> json) {
     return WalletData(
       wallets: (json['balances'] as List)
@@ -47,7 +55,8 @@ class WalletData {
   }
 }
 
-/// Modelo que representa una transaccion en la blockchain
+/// Modelo que representa una transaccion en la blockchain.
+/// Incluye el hash, red, tipo, montos, estado y enlace al explorador.
 class Transaction {
   final String txHash;
   final String network;
@@ -77,6 +86,8 @@ class Transaction {
     this.slot = 0,
   });
 
+  /// Construye una transaccion desde la respuesta JSON del backend.
+  /// Convierte timestamp a DateTime si esta presente.
   factory Transaction.fromJson(Map<String, dynamic> json) {
     return Transaction(
       txHash: json['tx_hash'] ?? '',

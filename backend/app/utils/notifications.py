@@ -1,3 +1,8 @@
+"""Utilidad de notificaciones por correo electronico para la wallet multicadena.
+Envua correos SMTP con soporte TLS para notificar inicios de sesion y registros.
+Si SMTP no esta configurado, los correos se omiten silenciosamente.
+"""
+
 import smtplib
 import logging
 from email.mime.text import MIMEText

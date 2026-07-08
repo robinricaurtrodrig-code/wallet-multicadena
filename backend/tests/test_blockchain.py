@@ -13,6 +13,8 @@ class TestGetBalance:
 
     @patch("app.controllers.transactions.SolanaService")
     def test_solana_balance(self, mock_solana, client):
+        """Verifica que se obtenga el balance de Solana con conversion a USD."""
+
         mock_solana.return_value.get_balance = AsyncMock(return_value=10.5)
         with patch("app.controllers.transactions.get_usd_prices", new_callable=AsyncMock) as mock_prices:
             mock_prices.return_value = {"solana": 150.0}
@@ -29,6 +31,8 @@ class TestGetBalance:
 
     @patch("app.controllers.transactions.BitcoinService")
     def test_bitcoin_balance(self, mock_btc, client):
+        """Verifica que se obtenga el balance de Bitcoin con conversion a USD."""
+
         mock_btc.return_value.get_balance = AsyncMock(return_value=0.5)
         with patch("app.controllers.transactions.get_usd_prices", new_callable=AsyncMock) as mock_prices:
             mock_prices.return_value = {"bitcoin": 42000.0}
@@ -45,6 +49,8 @@ class TestGetBalance:
 
     @patch("app.controllers.transactions.BNBService")
     def test_bnb_balance(self, mock_bnb, client):
+        """Verifica que se obtenga el balance de BNB con conversion a USD."""
+
         mock_bnb.return_value.get_balance = AsyncMock(return_value=25.0)
         with patch("app.controllers.transactions.get_usd_prices", new_callable=AsyncMock) as mock_prices:
             mock_prices.return_value = {"bnb": 333.0}
@@ -60,6 +66,8 @@ class TestGetBalance:
 
     @patch("app.controllers.transactions.SolanaService")
     def test_balance_returns_zero_on_error(self, mock_solana, client):
+        """Verifica que ante un error del RPC se retorne balance 0 sin lanzar excepcion."""
+
         mock_solana.return_value.get_balance = AsyncMock(side_effect=Exception("RPC error"))
         with patch("app.controllers.transactions.get_usd_prices", new_callable=AsyncMock) as mock_prices:
             mock_prices.return_value = {"solana": 150.0}
@@ -76,6 +84,8 @@ class TestPrepareSend:
 
     @patch("app.controllers.transactions.SolanaService")
     def test_prepare_send_solana(self, mock_solana, client):
+        """Verifica que prepare-send retorne blockhash y fee para Solana."""
+
         mock_solana.return_value.prepare_transaction = AsyncMock(return_value={
             "recent_blockhash": "abc123",
             "fee_lamports_per_signature": 5000,
@@ -97,6 +107,8 @@ class TestPrepareSend:
 
     @patch("app.controllers.transactions.BitcoinService")
     def test_prepare_send_bitcoin(self, mock_btc, client):
+        """Verifica que prepare-send retorne UTXOs y datos de cambio para Bitcoin."""
+
         mock_btc.return_value.prepare_transaction = AsyncMock(return_value={
             "utxos": [{"txid": "prevtx", "vout": 0, "value": 100000}],
             "change_address": "ChangeAddr",
@@ -119,6 +131,8 @@ class TestPrepareSend:
 
     @patch("app.controllers.transactions.BNBService")
     def test_prepare_send_bnb(self, mock_bnb, client):
+        """Verifica que prepare-send retorne nonce, gas_price y chain_id para BNB."""
+
         mock_bnb.return_value.prepare_transaction = AsyncMock(return_value={
             "nonce": "5",
             "gas_price_wei": 5000000000,
@@ -142,6 +156,7 @@ class TestPrepareSend:
         assert data["preparation_data"]["chain_id"] == 56
 
     def test_prepare_send_invalid_network(self, client):
+        """Verifica que una red no soportada retorne error 422."""
         response = client.post(
             "/api/v1/blockchain/prepare-send",
             json={
@@ -159,6 +174,8 @@ class TestSendTransaction:
 
     @patch("app.controllers.transactions.SolanaService")
     def test_send_solana_transaction(self, mock_solana, client):
+        """Verifica que el envio de una transaccion Solana retorne tx_hash y explorer_url."""
+
         mock_solana.return_value.send_transaction = AsyncMock(
             return_value="5VERv8NM1iEdYoRXjF3PgnT2BpyM8QkfFfQ4o7yFJ9Wr"
         )
@@ -181,6 +198,8 @@ class TestSendTransaction:
 
     @patch("app.controllers.transactions.SolanaService")
     def test_send_transaction_failure(self, mock_solana, client):
+        """Verifica que un error en el RPC al enviar retorne status 500."""
+
         mock_solana.return_value.send_transaction = AsyncMock(
             side_effect=Exception("Blockchain rejected tx")
         )
@@ -203,6 +222,8 @@ class TestGetHistory:
 
     @patch("app.controllers.transactions.SolanaService")
     def test_get_history_solana(self, mock_solana, client):
+        """Verifica que el historial retorne transacciones con tipo recibido y enviado."""
+
         mock_solana.return_value.get_transaction_history = AsyncMock(return_value=[
             {
                 "signature": "sig1",

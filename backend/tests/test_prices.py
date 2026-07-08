@@ -17,7 +17,7 @@ class TestPrices:
     }
 
     def _make_mock_response(self):
-        """Crea un mock de respuesta HTTP con json() sincrono"""
+        """Crea un mock de respuesta HTTP con json() sincrono para simular CoinGecko."""
         mock_resp = MagicMock()
         mock_resp.status_code = 200
         mock_resp.json.return_value = self.COINGECKO_RESPONSE
@@ -26,6 +26,7 @@ class TestPrices:
 
     @patch("app.controllers.prices.httpx.AsyncClient")
     def test_get_prices_success(self, mock_httpx, client):
+        """Verifica que el endpoint de precios retorne SOL, BTC y BNB correctamente."""
         mock_resp = self._make_mock_response()
         mock_httpx.return_value.__aenter__.return_value.get.return_value = mock_resp
 
@@ -51,7 +52,7 @@ class TestPrices:
 
     @patch("app.controllers.prices.httpx.AsyncClient")
     def test_prices_use_cache(self, mock_httpx, client):
-        """La segunda llamada debe usar cache, no llamar a CoinGecko"""
+        """Verifica que la segunda llamada use el cache y no consulte CoinGecko nuevamente."""
         mock_resp = self._make_mock_response()
         mock_httpx.return_value.__aenter__.return_value.get.return_value = mock_resp
 

@@ -1,5 +1,5 @@
-// SecuritySettingsScreen: configuracion de PIN, biometria, anti-phishing y auto-logout
-
+/// SecuritySettingsScreen: Pantalla de configuracion de seguridad
+/// Permite cambiar PIN, habilitar biometria, configurar anti-phishing, auto-logout y cerrar sesion
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
@@ -8,6 +8,7 @@ import '../../controllers/auth_provider.dart';
 import '../../controllers/security_provider.dart';
 import '../../services/biometric_service.dart';
 
+/// Pantalla de ajustes de seguridad con PIN, biometria, anti-phishing y cierre de sesion
 class SecuritySettingsScreen extends StatefulWidget {
   const SecuritySettingsScreen({super.key});
 
@@ -15,6 +16,7 @@ class SecuritySettingsScreen extends StatefulWidget {
   State<SecuritySettingsScreen> createState() => _SecuritySettingsScreenState();
 }
 
+/// Estado del SecuritySettingsScreen: carga configuraciones y maneja cambios de seguridad
 class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
   final _phishingCtrl = TextEditingController();
   final _newPinCtrl = TextEditingController();
@@ -28,6 +30,7 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
     _loadSettings();
   }
 
+  /// Carga las configuraciones guardadas: PIN, biometria, anti-phishing y auto-logout
   Future<void> _loadSettings() async {
     final minutes = await SecureStorage.getAutoLogoutMinutes();
     final code = await SecureStorage.getAntiPhishingCode();

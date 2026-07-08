@@ -1,7 +1,13 @@
+/// Widget que muestra un banner de conexion cuando el dispositivo no tiene internet.
+/// Escucha el estado de conectividad a traves de ConnectivityProvider
+/// y muestra una barra naranja con el mensaje "Sin conexion a internet".
+/// La transicion entre los estados online/offline es animada con AnimatedCrossFade.
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../controllers/connectivity_provider.dart';
 
+/// Widget que envuelve su hijo con un banner de conectividad.
+/// Muestra un banner naranja en la parte superior cuando no hay internet.
 class ConnectivityBanner extends StatelessWidget {
   final Widget child;
 
@@ -12,6 +18,7 @@ class ConnectivityBanner extends StatelessWidget {
     final isOnline = context.watch<ConnectivityProvider>().isOnline;
     return Column(
       children: [
+        // Banner animado que aparece/desaparece segun la conectividad
         AnimatedCrossFade(
           firstChild: Container(
             width: double.infinity,

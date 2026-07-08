@@ -1,3 +1,8 @@
+"""Servicio de Firebase para la wallet multicadena.
+Inicializa y expone el SDK Admin de Firebase para autenticacion,
+Firestore (base de datos) y FCM (notificaciones push).
+"""
+
 import firebase_admin
 from firebase_admin import credentials, auth, firestore, messaging
 from app.config import get_settings

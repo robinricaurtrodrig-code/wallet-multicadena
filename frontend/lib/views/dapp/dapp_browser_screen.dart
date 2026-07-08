@@ -1,9 +1,11 @@
-// DAppBrowserScreen: lista de DApps populares para conectar la wallet
-
+/// DAppBrowserScreen: Lista de DApps populares para conectar la wallet
+/// Muestra aplicaciones descentralizadas como Uniswap, PancakeSwap, Jupiter, etc.
+/// Cada DApp se abre en el navegador del sistema
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../config/theme.dart';
 
+/// Pantalla de exploracion de DApps con lista de aplicaciones descentralizadas populares
 class DAppBrowserScreen extends StatelessWidget {
   const DAppBrowserScreen({super.key});
 

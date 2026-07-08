@@ -1,10 +1,11 @@
-// LockScreen: pantalla de bloqueo con PIN y biometria
-
+/// LockScreen: Pantalla de bloqueo de la wallet
+/// Solicita PIN o autenticacion biometrica para desbloquear el acceso a la app
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../controllers/security_provider.dart';
 
+/// Pantalla de bloqueo que pide PIN o biometria para desbloquear la wallet
 class LockScreen extends StatefulWidget {
   const LockScreen({super.key});
 
@@ -12,6 +13,7 @@ class LockScreen extends StatefulWidget {
   State<LockScreen> createState() => _LockScreenState();
 }
 
+/// Estado del LockScreen: maneja el PIN ingresado y los metodos de desbloqueo
 class _LockScreenState extends State<LockScreen> {
   final _pinCtrl = TextEditingController();
   final _formKey = GlobalKey<FormState>();

@@ -1,5 +1,9 @@
+/// Configuracion de temas (oscuro y claro) para la aplicacion Wallet Multicadena.
+/// Define la paleta de colores, estilos de componentes y tipografia
+/// usando Material 3 con diseño moderno.
 import 'package:flutter/material.dart';
 
+/// Clase que contiene la paleta de colores y los temas de la aplicacion.
 class AppTheme {
   // Colores principales de la marca
   static const Color primary = Color(0xFF6C5CE7);   // Purple principal (botones, acentos)
@@ -27,7 +31,9 @@ class AppTheme {
   static const Color textDark = Color(0xFFDFE6E9);         // Texto principal oscuro
   static const Color textDarkSecondary = Color(0xFFB2BEC3); // Texto secundario oscuro
 
-  /// Tema oscuro completo con diseño Material 3
+  /// Tema oscuro completo con diseño Material 3.
+  /// Usa colores oscuros para fondos, tarjetas y texto,
+  /// con el purple principal como color de acento.
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
@@ -81,7 +87,9 @@ class AppTheme {
     );
   }
 
-  /// Tema claro completo con diseño Material 3
+  /// Tema claro completo con diseño Material 3.
+  /// Usa colores claros para fondos y tarjetas,
+  /// con el purple principal como color de acento.
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,

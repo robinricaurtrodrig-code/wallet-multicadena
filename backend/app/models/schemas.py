@@ -1,3 +1,8 @@
+"""Esquemas Pydantic para la wallet multicadena.
+Define los modelos de datos para autenticacion, balances, transacciones,
+precios y configuracion de usuario con validacion de tipos y formatos.
+"""
+
 from pydantic import BaseModel, Field
 from typing import Optional
 from enum import Enum

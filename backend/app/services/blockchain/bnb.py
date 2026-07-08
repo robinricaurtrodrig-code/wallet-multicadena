@@ -1,3 +1,9 @@
+"""Servicio para interactuar con BNB Chain (BSC) mediante JSON-RPC sobre HTTPS.
+Implementa las operaciones de balance, preparacion de transacciones EVM,
+envio de transacciones RLP firmadas e historial escaneando bloques recientes.
+Convierte entre wei y BNB (1 BNB = 10^18 wei).
+"""
+
 import httpx
 import asyncio
 import logging
@@ -11,6 +17,7 @@ class BNBService(BlockchainService):
     """Servicio para interactuar con BNB Chain (BSC) usando JSON-RPC sobre HTTPS"""
 
     def __init__(self):
+        """Inicializa el servicio con la URL del RPC de BNB Chain desde la configuracion."""
         self.rpc_url = get_settings().bnb_rpc_url
 
     async def _rpc_call(self, method: str, params: list, retries: int = 2) -> dict:

@@ -1,3 +1,6 @@
+/// Archivo principal de entrada de la aplicacion Wallet Multicadena.
+/// Inicializa Firebase, configura las notificaciones push (FCM)
+/// y lanza la interfaz con los providers globales (autenticacion, wallet, seguridad, conectividad).
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
@@ -11,14 +14,18 @@ import 'services/api_service.dart';
 import 'services/firebase_messaging_service.dart';
 import 'app.dart';
 
+/// Clave global del navegador, necesaria para redirigir desde notificaciones push.
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+/// Instancia global del servicio de API (inyectada en los providers).
 final ApiService apiService = ApiService();
 
+/// Punto de entrada de la aplicacion.
+/// Inicializa Firebase, registra FCM en dispositivos moviles y monta el arbol de widgets con MultiProvider.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    // Inicializar Firebase
+    // Inicializar Firebase con las opciones de la plataforma actual
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
@@ -45,6 +52,7 @@ void main() async {
     return;
   }
 
+  // Montar el arbol de widgets con los proveedores de estado global
   runApp(
     MultiProvider(
       providers: [

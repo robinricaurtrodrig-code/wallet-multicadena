@@ -1,3 +1,6 @@
+/// Archivo de configuracion de la aplicacion Wallet Multicadena.
+/// Define el widget raiz WalletApp con temas claro/oscuro,
+/// el guardian de autenticacion AuthGate y el guardian de bloqueo LockGate.
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'controllers/auth_provider.dart';

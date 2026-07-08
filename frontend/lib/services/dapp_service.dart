@@ -1,5 +1,5 @@
-// DAppService: firma mensajes con claves de Solana, Bitcoin y BNB
-
+/// Servicio para firmar mensajes con claves de Solana (Ed25519), Bitcoin (ECDSA) y BNB (Ethereum personal_sign).
+/// Util para la interaccion con dApps que requieren prueba de posesion de una clave privada.
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:hex/hex.dart';
@@ -8,8 +8,10 @@ import 'package:bip32/bip32.dart' as bip32;
 import 'package:cryptography/cryptography.dart';
 import 'package:pointycastle/export.dart';
 
+/// Clase que implementa la firma de mensajes para las tres redes soportadas.
 class DAppService {
-  /// Firma mensaje con Ed25519 (Solana), retorna base64
+  /// Firma mensaje con Ed25519 (Solana), retorna base64.
+  /// Deriva la clave publica a partir de la clave privada mediante SHA-512.
   static Future<String> signSolanaMessage({
     required Uint8List privateKey,
     required String message,
@@ -30,7 +32,8 @@ class DAppService {
     return base64.encode(Uint8List.fromList(sig.bytes));
   }
 
-  /// Firma mensaje con personal_sign de Ethereum (BNB), retorna hex
+  /// Firma mensaje con personal_sign de Ethereum (BNB), retorna hex con prefijo 0x.
+  /// Sigue el formato de EIP-191 para mensajes firmados.
   static String signBnbMessage({
     required Uint8List privateKey,
     required String message,
@@ -41,7 +44,8 @@ class DAppService {
     return '0x${HEX.encode(sig)}';
   }
 
-  /// Firma mensaje con ECDSA (Bitcoin), retorna hex
+  /// Firma mensaje con ECDSA (Bitcoin), retorna hex.
+  /// Primero hace double SHA-256 del mensaje antes de firmar (formato Bitcoin Message).
   static String signBitcoinMessage({
     required bip32.BIP32 key,
     required String message,
@@ -52,16 +56,19 @@ class DAppService {
     return HEX.encode(sig);
   }
 
+  /// Calcula SHA-256 de los datos.
   static Uint8List _sha256(Uint8List data) {
     final hasher = SHA256Digest();
     return hasher.process(data);
   }
 
+  /// Calcula SHA-512 de los datos.
   static Uint8List _sha512(Uint8List data) {
     final hasher = SHA512Digest();
     return hasher.process(data);
   }
 
+  /// Calcula double SHA-256 (SHA-256 de SHA-256).
   static Uint8List _doubleSha256(Uint8List data) {
     return _sha256(_sha256(data));
   }
