@@ -48,6 +48,8 @@ class Settings(BaseSettings):
         }
         if not v or not v.startswith(("http://", "https://", "wss://")):
             return defaults[info.field_name]
+        if info.field_name in ("bnb_rpc_url",) and "mempool" in v:
+            return defaults[info.field_name]
         return v
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
