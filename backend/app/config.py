@@ -37,6 +37,13 @@ class Settings(BaseSettings):
             raise ValueError("FIREBASE_PROJECT_ID es requerido")
         return v
 
+    @field_validator("solana_rpc_url", "solana_ws_url", "bitcoin_rpc_url", "bnb_rpc_url")
+    @classmethod
+    def validate_rpc_url(cls, v):
+        if not v or not v.startswith(("http://", "https://", "wss://")):
+            return cls.model_fields[v].default
+        return v
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
 
