@@ -115,6 +115,28 @@ class ApiService {
     throw Exception('Error al preparar transaccion');
   }
 
+  /// Notifica al backend sobre un inicio de sesion (para enviar correo)
+  Future<void> notifyLogin(String email, String username) async {
+    try {
+      await http.post(
+        Uri.parse('$baseUrl/auth/notify-login'),
+        headers: _headers,
+        body: json.encode({'email': email, 'username': username}),
+      ).timeout(const Duration(seconds: 10));
+    } catch (_) {}
+  }
+
+  /// Notifica al backend sobre un registro (para enviar correo de bienvenida)
+  Future<void> notifyRegister(String email, String username) async {
+    try {
+      await http.post(
+        Uri.parse('$baseUrl/auth/notify-register'),
+        headers: _headers,
+        body: json.encode({'email': email, 'username': username}),
+      ).timeout(const Duration(seconds: 10));
+    } catch (_) {}
+  }
+
   /// Actualiza la configuracion del usuario en el backend
   Future<void> updateSettings(Map<String, dynamic> settings) async {
     final response = await http

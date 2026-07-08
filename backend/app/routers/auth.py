@@ -17,6 +17,7 @@ from app.services.firebase import (
 from app.utils.security import limiter, hash_device_id
 from app.utils.notifications import send_email
 from fastapi import Request
+from pydantic import BaseModel
 from google.cloud import firestore
 import firebase_admin.auth
 
@@ -71,13 +72,6 @@ async def register(request: Request, body: AuthRegisterRequest):
     }
     db.collection("SETTINGS").document(uid).set(settings_data)
 
-    # Enviar correo de bienvenida al usuario
-    send_email(
-        to_email=body.email,
-        subject="Bienvenido a Wallet Multicadena",
-        body=f"Hola {body.username},\n\nTu cuenta ha sido creada exitosamente en Wallet Multicadena.\n\nYa puedes iniciar sesion y crear tu wallet para enviar y recibir SOL, BTC y BNB.\n\nGracias por confiar en nosotros.",
-    )
-
     # Generar token JWT personalizado de Firebase
     token = firebase_admin.auth.create_custom_token(uid)
 
@@ -106,13 +100,6 @@ async def login(request: Request, body: AuthLoginRequestV2):
     user_doc = db.collection("USERS").document(uid).get()
     user_data = user_doc.to_dict() if user_doc.exists else {}
 
-    # Enviar alerta de inicio de sesion al usuario
-    send_email(
-        to_email=user_data.get("email", ""),
-        subject="Inicio de sesion en Wallet Multicadena",
-        body=f"Hola {user_data.get('username', 'Usuario')},\n\nSe ha iniciado sesion en tu cuenta de Wallet Multicadena.\n\nSi fuiste tu, ignora este mensaje.\nSi NO fuiste tu, cambia tu contrasena inmediatamente.",
-    )
-
     # Registrar la sesion en Firestore (coleccion SESSION)
     session_data = {
         "deviceId": hash_device_id(body.device_id) if body.device_id else "",
@@ -129,6 +116,33 @@ async def login(request: Request, body: AuthLoginRequestV2):
         token=body.id_token,
         wallet_created=user_data.get("walletCreada", False),
     )
+
+
+class NotifyLoginRequest(BaseModel):
+    email: str
+    username: str
+
+
+@router.post("/notify-login")
+@limiter.limit("10/minute")
+async def notify_login(request: Request, body: NotifyLoginRequest):
+    send_email(
+        to_email=body.email,
+        subject="Inicio de sesion en Wallet Multicadena",
+        body=f"Hola {body.username},\n\nSe ha iniciado sesion en tu cuenta de Wallet Multicadena.\n\nSi fuiste tu, ignora este mensaje.\nSi NO fuiste tu, cambia tu contrasena inmediatamente.",
+    )
+    return {"status": "ok"}
+
+
+@router.post("/notify-register")
+@limiter.limit("5/minute")
+async def notify_register(request: Request, body: NotifyLoginRequest):
+    send_email(
+        to_email=body.email,
+        subject="Bienvenido a Wallet Multicadena",
+        body=f"Hola {body.username},\n\nTu cuenta ha sido creada exitosamente en Wallet Multicadena.\n\nYa puedes iniciar sesion y crear tu wallet para enviar y recibir SOL, BTC y BNB.\n\nGracias por confiar en nosotros.",
+    )
+    return {"status": "ok"}
 
 
 @router.post("/logout")

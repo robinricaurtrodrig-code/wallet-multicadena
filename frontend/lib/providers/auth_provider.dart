@@ -104,6 +104,11 @@ class AuthProvider extends ChangeNotifier {
       if (firebaseUser != null) {
         await _loadUserData(firebaseUser);
       }
+
+      // Notificar al backend para enviar correo de bienvenida
+      try {
+        await apiService.notifyRegister(_user?.email ?? email, _user?.username ?? username);
+      } catch (_) {}
     } catch (e) {
       _error = _mapFirebaseError(e.toString());
       _status = AuthStatus.unauthenticated;
@@ -126,6 +131,11 @@ class AuthProvider extends ChangeNotifier {
       if (firebaseUser != null) {
         await _loadUserData(firebaseUser);
       }
+
+      // Notificar al backend para enviar correo de inicio de sesion
+      try {
+        await apiService.notifyLogin(_user?.email ?? email, _user?.username ?? '');
+      } catch (_) {}
     } catch (e) {
       _error = _mapFirebaseError(e.toString());
       _status = AuthStatus.unauthenticated;
