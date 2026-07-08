@@ -42,7 +42,7 @@ dependencies:
 
   # UI
   qr_flutter: ^4.1.0
-  mobile_scanner: ^3.5.0
+  mobile_scanner: ^6.0.0
   local_auth: ^2.1.8
   flutter_svg: ^2.0.9
   cached_network_image: ^3.3.1
