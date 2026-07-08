@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/wallet_provider.dart';
+import '../../controllers/wallet_provider.dart';
 import '../../core/storage/secure_storage.dart';
 import '../../services/biometric_service.dart';
 import '../../config/theme.dart';

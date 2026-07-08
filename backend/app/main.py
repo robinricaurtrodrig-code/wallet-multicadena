@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from app.routers import auth, prices, transactions
+from app.controllers import auth, prices, transactions
 from app.utils.security import limiter
 from contextlib import asynccontextmanager
 from app.services.firebase import get_firebase_app

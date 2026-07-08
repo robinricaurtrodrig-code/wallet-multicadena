@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../config/theme.dart';
-import '../../providers/wallet_provider.dart';
+import '../../controllers/wallet_provider.dart';
 
 /// ReceiveScreen: Pantalla para recibir criptomonedas
 /// Muestra la direccion publica de cada red con codigo QR para compartir

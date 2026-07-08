@@ -3,9 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../config/theme.dart';
 import '../../models/wallet.dart';
-import '../../providers/wallet_provider.dart';
-import '../../providers/auth_provider.dart';
-import '../../providers/connectivity_provider.dart';
+import '../../controllers/wallet_provider.dart';
+import '../../controllers/auth_provider.dart';
+import '../../controllers/connectivity_provider.dart';
 import '../../services/api_service.dart';
 
 class HistoryScreen extends StatefulWidget {

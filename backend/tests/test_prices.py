@@ -24,7 +24,7 @@ class TestPrices:
         mock_resp.headers = {"date": "Mon, 04 Jul 2026 12:00:00 GMT"}
         return mock_resp
 
-    @patch("app.routers.prices.httpx.AsyncClient")
+    @patch("app.controllers.prices.httpx.AsyncClient")
     def test_get_prices_success(self, mock_httpx, client):
         mock_resp = self._make_mock_response()
         mock_httpx.return_value.__aenter__.return_value.get.return_value = mock_resp
@@ -37,7 +37,7 @@ class TestPrices:
         assert data["bnb"] == 333.50
         assert "last_updated" in data
 
-    @patch("app.routers.prices.httpx.AsyncClient")
+    @patch("app.controllers.prices.httpx.AsyncClient")
     def test_get_prices_coin_ids(self, mock_httpx, client):
         """Verifica que CoinGecko recibe los parametros correctos"""
         mock_resp = self._make_mock_response()
@@ -49,7 +49,7 @@ class TestPrices:
         assert call_kwargs["params"]["ids"] == "solana,bitcoin,binancecoin"
         assert call_kwargs["params"]["vs_currencies"] == "usd"
 
-    @patch("app.routers.prices.httpx.AsyncClient")
+    @patch("app.controllers.prices.httpx.AsyncClient")
     def test_prices_use_cache(self, mock_httpx, client):
         """La segunda llamada debe usar cache, no llamar a CoinGecko"""
         mock_resp = self._make_mock_response()

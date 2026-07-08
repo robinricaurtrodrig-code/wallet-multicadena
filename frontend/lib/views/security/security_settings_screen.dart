@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../core/storage/secure_storage.dart';
-import '../../providers/auth_provider.dart';
-import '../../providers/security_provider.dart';
+import '../../controllers/auth_provider.dart';
+import '../../controllers/security_provider.dart';
 import '../../services/biometric_service.dart';
 
 class SecuritySettingsScreen extends StatefulWidget {

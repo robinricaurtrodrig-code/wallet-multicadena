@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/wallet_provider.dart';
+import '../../controllers/wallet_provider.dart';
 import '../../core/crypto/bip39.dart';
 import '../../config/theme.dart';
 import 'setup_pin_screen.dart';

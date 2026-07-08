@@ -24,7 +24,7 @@ def mock_firebase():
     """
     with patch("app.services.firebase.get_firebase_app") as mock_get_app, \
          patch("app.services.firebase.get_firestore_client") as mock_get_db, \
-         patch("app.routers.auth.verify_id_token") as mock_verify, \
+         patch("app.controllers.auth.verify_id_token") as mock_verify, \
          patch("app.middleware.auth.verify_id_token") as mock_verify_mw:
 
         mock_verify.return_value = {"uid": "test-uid-123", "email": "test@example.com"}
@@ -53,8 +53,8 @@ def mock_firebase():
 @pytest.fixture(autouse=True)
 def clear_caches():
     """Limpia los caches en memoria entre tests para evitar contaminacion"""
-    import app.routers.prices as prices_module
-    import app.routers.transactions as txs_module
+    import app.controllers.prices as prices_module
+    import app.controllers.transactions as txs_module
     prices_module.price_cache.clear()
     txs_module.price_cache.clear()
     yield

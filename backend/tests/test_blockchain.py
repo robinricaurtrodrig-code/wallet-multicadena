@@ -11,10 +11,10 @@ from unittest.mock import patch, AsyncMock, MagicMock
 class TestGetBalance:
     """Test del endpoint de balance con servicios blockchain mockeados"""
 
-    @patch("app.routers.transactions.SolanaService")
+    @patch("app.controllers.transactions.SolanaService")
     def test_solana_balance(self, mock_solana, client):
         mock_solana.return_value.get_balance = AsyncMock(return_value=10.5)
-        with patch("app.routers.transactions.get_usd_prices", new_callable=AsyncMock) as mock_prices:
+        with patch("app.controllers.transactions.get_usd_prices", new_callable=AsyncMock) as mock_prices:
             mock_prices.return_value = {"solana": 150.0}
 
             response = client.get(
@@ -27,10 +27,10 @@ class TestGetBalance:
             assert data["balance"] == 10.5
             assert data["balance_usd"] == 1575.0
 
-    @patch("app.routers.transactions.BitcoinService")
+    @patch("app.controllers.transactions.BitcoinService")
     def test_bitcoin_balance(self, mock_btc, client):
         mock_btc.return_value.get_balance = AsyncMock(return_value=0.5)
-        with patch("app.routers.transactions.get_usd_prices", new_callable=AsyncMock) as mock_prices:
+        with patch("app.controllers.transactions.get_usd_prices", new_callable=AsyncMock) as mock_prices:
             mock_prices.return_value = {"bitcoin": 42000.0}
 
             response = client.get(
@@ -43,10 +43,10 @@ class TestGetBalance:
             assert data["balance"] == 0.5
             assert data["balance_usd"] == 21000.0
 
-    @patch("app.routers.transactions.BNBService")
+    @patch("app.controllers.transactions.BNBService")
     def test_bnb_balance(self, mock_bnb, client):
         mock_bnb.return_value.get_balance = AsyncMock(return_value=25.0)
-        with patch("app.routers.transactions.get_usd_prices", new_callable=AsyncMock) as mock_prices:
+        with patch("app.controllers.transactions.get_usd_prices", new_callable=AsyncMock) as mock_prices:
             mock_prices.return_value = {"bnb": 333.0}
 
             response = client.get(
@@ -58,10 +58,10 @@ class TestGetBalance:
             assert data["symbol"] == "BNB"
             assert data["balance"] == 25.0
 
-    @patch("app.routers.transactions.SolanaService")
+    @patch("app.controllers.transactions.SolanaService")
     def test_balance_returns_zero_on_error(self, mock_solana, client):
         mock_solana.return_value.get_balance = AsyncMock(side_effect=Exception("RPC error"))
-        with patch("app.routers.transactions.get_usd_prices", new_callable=AsyncMock) as mock_prices:
+        with patch("app.controllers.transactions.get_usd_prices", new_callable=AsyncMock) as mock_prices:
             mock_prices.return_value = {"solana": 150.0}
 
             response = client.get(
@@ -74,7 +74,7 @@ class TestGetBalance:
 class TestPrepareSend:
     """Test del endpoint de preparacion de envio"""
 
-    @patch("app.routers.transactions.SolanaService")
+    @patch("app.controllers.transactions.SolanaService")
     def test_prepare_send_solana(self, mock_solana, client):
         mock_solana.return_value.prepare_transaction = AsyncMock(return_value={
             "recent_blockhash": "abc123",
@@ -95,7 +95,7 @@ class TestPrepareSend:
         assert data["network"] == "solana"
         assert "recent_blockhash" in data["preparation_data"]
 
-    @patch("app.routers.transactions.BitcoinService")
+    @patch("app.controllers.transactions.BitcoinService")
     def test_prepare_send_bitcoin(self, mock_btc, client):
         mock_btc.return_value.prepare_transaction = AsyncMock(return_value={
             "utxos": [{"txid": "prevtx", "vout": 0, "value": 100000}],
@@ -117,7 +117,7 @@ class TestPrepareSend:
         assert data["network"] == "bitcoin"
         assert len(data["preparation_data"]["utxos"]) == 1
 
-    @patch("app.routers.transactions.BNBService")
+    @patch("app.controllers.transactions.BNBService")
     def test_prepare_send_bnb(self, mock_bnb, client):
         mock_bnb.return_value.prepare_transaction = AsyncMock(return_value={
             "nonce": "5",
@@ -157,7 +157,7 @@ class TestPrepareSend:
 class TestSendTransaction:
     """Test del endpoint de envio de transaccion firmada"""
 
-    @patch("app.routers.transactions.SolanaService")
+    @patch("app.controllers.transactions.SolanaService")
     def test_send_solana_transaction(self, mock_solana, client):
         mock_solana.return_value.send_transaction = AsyncMock(
             return_value="5VERv8NM1iEdYoRXjF3PgnT2BpyM8QkfFfQ4o7yFJ9Wr"
@@ -179,7 +179,7 @@ class TestSendTransaction:
         assert data["status"] == "pendiente"
         assert "explorer_url" in data
 
-    @patch("app.routers.transactions.SolanaService")
+    @patch("app.controllers.transactions.SolanaService")
     def test_send_transaction_failure(self, mock_solana, client):
         mock_solana.return_value.send_transaction = AsyncMock(
             side_effect=Exception("Blockchain rejected tx")
@@ -201,7 +201,7 @@ class TestSendTransaction:
 class TestGetHistory:
     """Test del endpoint de historial de transacciones"""
 
-    @patch("app.routers.transactions.SolanaService")
+    @patch("app.controllers.transactions.SolanaService")
     def test_get_history_solana(self, mock_solana, client):
         mock_solana.return_value.get_transaction_history = AsyncMock(return_value=[
             {

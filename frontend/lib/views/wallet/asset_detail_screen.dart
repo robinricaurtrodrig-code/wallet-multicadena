@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../config/theme.dart';
 import '../../models/wallet.dart';
-import '../../providers/wallet_provider.dart';
+import '../../controllers/wallet_provider.dart';
 import 'send_screen.dart';
 import 'receive_screen.dart';
 

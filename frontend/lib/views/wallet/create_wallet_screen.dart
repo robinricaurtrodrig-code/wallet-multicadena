@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/wallet_provider.dart';
+import '../../controllers/wallet_provider.dart';
 import '../../config/theme.dart';
 import 'verify_seed_screen.dart';
 

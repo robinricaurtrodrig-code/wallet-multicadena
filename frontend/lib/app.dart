@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'providers/auth_provider.dart';
-import 'providers/security_provider.dart';
+import 'controllers/auth_provider.dart';
+import 'controllers/security_provider.dart';
 import 'config/theme.dart';
-import 'screens/auth/login_screen.dart';
-import 'screens/home/home_screen.dart';
-import 'screens/security/lock_screen.dart';
+import 'views/auth/login_screen.dart';
+import 'views/home/home_screen.dart';
+import 'views/security/lock_screen.dart';
 import 'widgets/connectivity_banner.dart';
 
 /// Widget principal de la aplicacion Wallet Multicadena

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/connectivity_provider.dart';
+import '../controllers/connectivity_provider.dart';
 
 class ConnectivityBanner extends StatelessWidget {
   final Widget child;

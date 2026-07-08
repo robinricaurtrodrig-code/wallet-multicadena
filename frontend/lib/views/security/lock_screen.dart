@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
-import '../../providers/security_provider.dart';
+import '../../controllers/security_provider.dart';
 
 class LockScreen extends StatefulWidget {
   const LockScreen({super.key});

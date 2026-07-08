@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:bip32/bip32.dart' as bip32;
-import 'package:wallet_multicadena/providers/auth_provider.dart';
-import 'package:wallet_multicadena/providers/wallet_provider.dart';
-import 'package:wallet_multicadena/providers/security_provider.dart';
+import 'package:wallet_multicadena/controllers/auth_provider.dart';
+import 'package:wallet_multicadena/controllers/wallet_provider.dart';
+import 'package:wallet_multicadena/controllers/security_provider.dart';
 import 'package:wallet_multicadena/models/wallet.dart';
 import 'package:wallet_multicadena/models/asset.dart';
 import 'package:wallet_multicadena/models/user.dart';
