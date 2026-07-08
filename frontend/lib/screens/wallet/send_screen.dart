@@ -387,7 +387,7 @@ class _NetworkChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: selected ? color.withOpacity(0.15) : AppTheme.cardDark,
+          color: selected ? color.withValues(alpha: 0.15) : AppTheme.cardDark,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: selected ? color : Colors.transparent,

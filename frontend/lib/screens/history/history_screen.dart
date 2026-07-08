@@ -203,7 +203,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         setState(() => _selectedNetwork = network);
         _loadHistory(network: network);
       },
-      selectedColor: _colorForNetwork(network).withOpacity(0.2),
+      selectedColor: _colorForNetwork(network).withValues(alpha: 0.2),
       checkmarkColor: _colorForNetwork(network),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: VisualDensity.compact,
@@ -238,7 +238,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.history, size: 64, color: AppTheme.textDarkSecondary.withOpacity(0.5)),
+            Icon(Icons.history, size: 64, color: AppTheme.textDarkSecondary.withValues(alpha: 0.5)),
             const SizedBox(height: 16),
             Text(
               'No hay transacciones en ${_networkName(_selectedNetwork)}',
@@ -280,7 +280,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: (isSent ? AppTheme.error : AppTheme.success).withOpacity(0.15),
+          backgroundColor: (isSent ? AppTheme.error : AppTheme.success).withValues(alpha: 0.15),
           child: Icon(
             isSent ? Icons.arrow_upward : Icons.arrow_downward,
             color: isSent ? AppTheme.error : AppTheme.success,
@@ -330,7 +330,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(

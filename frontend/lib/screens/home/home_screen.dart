@@ -421,7 +421,7 @@ class _ActionButton extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 24,
-            backgroundColor: AppTheme.primary.withOpacity(0.15),
+            backgroundColor: AppTheme.primary.withValues(alpha: 0.15),
             child: Icon(icon, color: AppTheme.primary),
           ),
           const SizedBox(height: 4),
@@ -453,7 +453,7 @@ class _AssetCard extends StatelessWidget {
     return Card(
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: _colorForNetwork(walletInfo.network).withOpacity(0.15),
+          backgroundColor: _colorForNetwork(walletInfo.network).withValues(alpha: 0.15),
           child: Text(
             walletInfo.symbol[0],
             style: TextStyle(
@@ -514,7 +514,7 @@ class _AssetCardPlaceholder extends StatelessWidget {
     return Card(
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: AppTheme.primary.withOpacity(0.15),
+          backgroundColor: AppTheme.primary.withValues(alpha: 0.15),
           child: Text(symbol[0], style: const TextStyle(color: AppTheme.primary)),
         ),
         title: Text('0.000000 $symbol'),

@@ -120,7 +120,7 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
             decoration: BoxDecoration(
               color: AppTheme.cardDark,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
+              border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
@@ -166,9 +166,9 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppTheme.warning.withOpacity(0.1),
+              color: AppTheme.warning.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppTheme.warning.withOpacity(0.3)),
+              border: Border.all(color: AppTheme.warning.withValues(alpha: 0.3)),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,

@@ -91,7 +91,7 @@ class _CreateWalletScreenState extends State<CreateWalletScreen> {
                     decoration: BoxDecoration(
                       color: AppTheme.cardDark,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppTheme.warning.withOpacity(0.5)),
+                      border: Border.all(color: AppTheme.warning.withValues(alpha: 0.5)),
                     ),
                     child: Wrap(
                       spacing: 8,
@@ -141,7 +141,7 @@ class _CreateWalletScreenState extends State<CreateWalletScreen> {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: AppTheme.primary.withOpacity(0.1),
+          color: AppTheme.primary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(

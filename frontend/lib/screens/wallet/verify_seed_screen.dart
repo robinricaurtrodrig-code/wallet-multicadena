@@ -122,7 +122,7 @@ class _VerifySeedScreenState extends State<VerifySeedScreen> {
                   children: _selectedIndices.map((i) {
                     return Chip(
                       label: Text(_shuffledWords[i]),
-                      backgroundColor: AppTheme.primary.withOpacity(0.2),
+                      backgroundColor: AppTheme.primary.withValues(alpha: 0.2),
                       deleteIcon: const Icon(Icons.close, size: 16),
                       onDeleted: () => _undo(),
                     );
@@ -149,7 +149,7 @@ class _VerifySeedScreenState extends State<VerifySeedScreen> {
                   return ActionChip(
                     label: Text(_shuffledWords[i]),
                     onPressed: selected ? null : () => _selectWord(i),
-                    backgroundColor: selected ? Colors.grey.withOpacity(0.3) : AppTheme.primary.withOpacity(0.1),
+                    backgroundColor: selected ? Colors.grey.withValues(alpha: 0.3) : AppTheme.primary.withValues(alpha: 0.1),
                   );
                 }),
               ),

@@ -83,7 +83,7 @@ class DAppBrowserScreen extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 12),
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: (dapp['color'] as Color).withOpacity(0.15),
+                backgroundColor: (dapp['color'] as Color).withValues(alpha: 0.15),
                 child: Icon(dapp['icon'] as IconData, color: dapp['color'] as Color),
               ),
               title: Text(dapp['name'] as String),

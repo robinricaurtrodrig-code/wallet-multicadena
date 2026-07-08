@@ -97,7 +97,7 @@ class _AssetDetailScreenState extends State<AssetDetailScreen> {
           // Icono grande del activo con color de red
           CircleAvatar(
             radius: 36,
-            backgroundColor: _colorForNetwork(info.network).withOpacity(0.15),
+            backgroundColor: _colorForNetwork(info.network).withValues(alpha: 0.15),
             child: Text(
               info.symbol[0],
               style: TextStyle(
@@ -210,7 +210,7 @@ class _AssetDetailScreenState extends State<AssetDetailScreen> {
         child: Center(
           child: Column(
             children: [
-              Icon(Icons.history, size: 48, color: AppTheme.textDarkSecondary.withOpacity(0.5)),
+              Icon(Icons.history, size: 48, color: AppTheme.textDarkSecondary.withValues(alpha: 0.5)),
               const SizedBox(height: 8),
               Text(
                 'Aun no hay transacciones',
@@ -232,7 +232,7 @@ class _AssetDetailScreenState extends State<AssetDetailScreen> {
     return Card(
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: (isSent ? AppTheme.error : AppTheme.success).withOpacity(0.15),
+          backgroundColor: (isSent ? AppTheme.error : AppTheme.success).withValues(alpha: 0.15),
           child: Icon(
             isSent ? Icons.arrow_upward : Icons.arrow_downward,
             color: isSent ? AppTheme.error : AppTheme.success,
@@ -281,7 +281,7 @@ class _AssetDetailScreenState extends State<AssetDetailScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
@@ -341,7 +341,7 @@ class _ActionChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppTheme.cardDark,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.primary.withOpacity(0.2)),
+          border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
         ),
         child: Column(
           children: [
