@@ -4,10 +4,11 @@ import '../models/wallet.dart';
 import '../models/asset.dart';
 
 class ApiService {
-  // En produccion, usar la URL del backend desplegado en GCP
+  // Por defecto apunta al backend en Railway; para desarrollo local:
+  // flutter run --dart-define=API_BASE_URL=http://localhost:8000/api/v1
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://localhost:8000/api/v1',
+    defaultValue: 'https://wallet-multicadena-production.up.railway.app/api/v1',
   );
 
   String? _token;
