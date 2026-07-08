@@ -51,7 +51,7 @@ dependencies:
   url_launcher: ^6.2.4
 
   # Utils
-  connectivity_plus: ^5.0.2
+  connectivity_plus: ^6.0.0
 
 dev_dependencies:
   flutter_test:

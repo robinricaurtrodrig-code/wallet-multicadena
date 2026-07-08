@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class ConnectivityProvider extends ChangeNotifier {
   final Connectivity _connectivity = Connectivity();
-  StreamSubscription<ConnectivityResult>? _subscription;
+  StreamSubscription<List<ConnectivityResult>>? _subscription;
   bool _isOnline = true;
 
   bool get isOnline => _isOnline;
@@ -21,8 +21,8 @@ class ConnectivityProvider extends ChangeNotifier {
     } catch (_) {}
   }
 
-  void _updateStatus(ConnectivityResult result) {
-    final online = result != ConnectivityResult.none;
+  void _updateStatus(List<ConnectivityResult> result) {
+    final online = !result.contains(ConnectivityResult.none);
     if (online != _isOnline) {
       _isOnline = online;
       notifyListeners();
