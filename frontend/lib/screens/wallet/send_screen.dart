@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../config/theme.dart';
 import '../../models/wallet.dart';
 import '../../providers/wallet_provider.dart';
@@ -321,7 +322,10 @@ class _SendScreenState extends State<SendScreen> {
             label: 'Ver',
             textColor: Colors.white,
             onPressed: () {
-              // TODO: Abrir URL del explorador con tx.txHash
+              final uri = Uri.tryParse(tx.explorerUrl);
+              if (uri != null) {
+                launchUrl(uri, mode: LaunchMode.externalApplication);
+              }
             },
           ),
         ),

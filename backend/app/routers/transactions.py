@@ -175,8 +175,8 @@ async def prepare_send(
             fee_estimate=round(fee_estimate, 10),
             preparation_data=prep_data,
         )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error al preparar transaccion: {str(e)}")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Error al preparar transaccion. Intente nuevamente.")
 
 
 @router.get("/history/{address}", response_model=list[TransactionHistoryItem])

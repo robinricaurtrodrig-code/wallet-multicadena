@@ -131,7 +131,7 @@ class BitcoinService(BlockchainService):
             for inp in tx.get("vin", []):
                 prevout = inp.get("prevout", {})
                 if prevout.get("scriptpubkey_address", "") == address:
-                    amount_sent += prevout.get("value", 0) / 1e8
+                    amount_sent += prevout.get("value", 0)
             amount_sent_btc = amount_sent / 1e8
 
             if amount_received > 0 and amount_sent == 0:

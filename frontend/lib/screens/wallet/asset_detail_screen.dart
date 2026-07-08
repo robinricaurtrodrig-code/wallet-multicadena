@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../config/theme.dart';
 import '../../models/wallet.dart';
 import '../../providers/wallet_provider.dart';
@@ -48,7 +49,18 @@ class _AssetDetailScreenState extends State<AssetDetailScreen> {
           IconButton(
             icon: const Icon(Icons.open_in_new),
             onPressed: () {
-              // TODO: Abrir URL del explorador de bloques
+              final explorerUrls = {
+                'solana': 'https://solscan.io/address/${info.address}',
+                'bitcoin': 'https://mempool.space/address/${info.address}',
+                'bnb': 'https://bscscan.com/address/${info.address}',
+              };
+              final url = explorerUrls[info.network];
+              if (url != null) {
+                final uri = Uri.tryParse(url);
+                if (uri != null) {
+                  launchUrl(uri, mode: LaunchMode.externalApplication);
+                }
+              }
             },
           ),
         ],
@@ -152,7 +164,18 @@ class _AssetDetailScreenState extends State<AssetDetailScreen> {
           ));
         }),
         _ActionChip(icon: Icons.shopping_cart, label: 'Comprar', onTap: () {
-          // TODO: Abrir enlace de compra (MoonPay, etc.)
+          final buyUrls = {
+            'solana': 'https://jup.ag/',
+            'bitcoin': 'https://exchange.binance.com/en/buy-bitcoin',
+            'bnb': 'https://pancakeswap.finance/swap',
+          };
+          final url = buyUrls[info.network];
+          if (url != null) {
+            final uri = Uri.tryParse(url);
+            if (uri != null) {
+              launchUrl(uri, mode: LaunchMode.externalApplication);
+            }
+          }
         }),
       ],
     );

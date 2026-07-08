@@ -107,6 +107,7 @@ class BNBService(BlockchainService):
             for resp in results:
                 block_data = resp.get("result", {})
                 block_num = resp.get("id", 0)
+                block_timestamp = int(block_data.get("timestamp", "0x0"), 16) if block_data else 0
                 for tx in block_data.get("transactions", []):
                     tx_hash = tx.get("hash", "")
                     if tx_hash in seen_hashes:
@@ -115,12 +116,24 @@ class BNBService(BlockchainService):
                     tx_to = (tx.get("to") or "").lower()
                     if tx_from == address_lower or tx_to == address_lower:
                         seen_hashes.add(tx_hash)
+                        value_wei = int(tx.get("value", "0x0"), 16)
+                        value_bnb = value_wei / 1e18
+                        gas = int(tx.get("gas", "0x0"), 16)
+                        gas_price = int(tx.get("gasPrice", "0x0"), 16)
+                        fee_bnb = (gas * gas_price) / 1e18 if gas > 0 and gas_price > 0 else 0
+                        is_sent = tx_from == address_lower
                         transactions.append({
                             "hash": tx_hash,
                             "from": tx.get("from", ""),
                             "to": tx.get("to", ""),
-                            "value": int(tx.get("value", "0x0"), 16) / 1e18,
+                            "value": value_bnb,
+                            "amount": value_bnb,
+                            "fee": round(fee_bnb, 10),
                             "block": block_num,
+                            "blockNumber": block_num,
+                            "blockTime": block_timestamp,
+                            "type": "sent" if is_sent else "received",
+                            "status": "confirmada",
                         })
                         if len(transactions) >= limit:
                             break
