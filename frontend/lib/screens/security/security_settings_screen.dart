@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../core/storage/secure_storage.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/security_provider.dart';
 import '../../services/biometric_service.dart';
 
@@ -216,8 +217,48 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
             onPressed: _savePhishingCode,
             child: const Text('Guardar Codigo'),
           ),
+          const Divider(height: 48),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _confirmLogout,
+              icon: const Icon(Icons.logout, color: AppTheme.error),
+              label: const Text('Cerrar Sesion', style: TextStyle(color: AppTheme.error)),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: AppTheme.error),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
         ],
       ),
     );
+  }
+
+  Future<void> _confirmLogout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.cardDark,
+        title: const Text('Cerrar Sesion'),
+        content: const Text('¿Estas seguro de que quieres cerrar sesion?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Cerrar Sesion', style: TextStyle(color: AppTheme.error)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      await context.read<AuthProvider>().logout();
+      if (mounted) Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const Scaffold(body: Center(child: CircularProgressIndicator()))),
+        (route) => false,
+      );
+    }
   }
 }
