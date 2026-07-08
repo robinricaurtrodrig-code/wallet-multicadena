@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../config/theme.dart';
 import '../../models/wallet.dart';
 import '../../providers/wallet_provider.dart';
@@ -274,11 +275,100 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
+  void _showTransactionDetail(Transaction tx) {
+    final isSent = tx.type == 'sent';
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.cardDark,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: (isSent ? AppTheme.error : AppTheme.success).withValues(alpha: 0.15),
+              child: Icon(
+                isSent ? Icons.arrow_upward : Icons.arrow_downward,
+                color: isSent ? AppTheme.error : AppTheme.success,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              isSent ? 'Transaccion Enviada' : 'Transaccion Recibida',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _detailRow('Red', _networkName(tx.network)),
+              const Divider(),
+              _detailRow('Estado', tx.status),
+              const Divider(),
+              _detailRow('Monto', '${tx.amount.toStringAsFixed(8)} ${tx.network == "solana" ? "SOL" : tx.network == "bitcoin" ? "BTC" : "BNB"}'),
+              const Divider(),
+              if (tx.fee > 0) ...[
+                _detailRow('Comision', '${tx.fee.toStringAsFixed(8)} ${tx.network == "solana" ? "SOL" : tx.network == "bitcoin" ? "BTC" : "BNB"}'),
+                const Divider(),
+              ],
+              _detailRow('Hash', tx.txHash),
+              const Divider(),
+              if (tx.timestamp != null) ...[
+                _detailRow('Fecha', _formatDate(tx.timestamp!)),
+                const Divider(),
+              ],
+              _detailRow('Explorador', tx.explorerUrl),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cerrar'),
+          ),
+          TextButton.icon(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _openUrl(tx.explorerUrl);
+            },
+            icon: const Icon(Icons.open_in_new, size: 16),
+            label: const Text('Ver en explorador'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _detailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: const TextStyle(fontSize: 11, color: AppTheme.textDarkSecondary)),
+          const SizedBox(height: 2),
+          SelectableText(value, style: const TextStyle(fontSize: 13)),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openUrl(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri != null && await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
   Widget _buildTransactionItem(Transaction tx) {
     final isSent = tx.type == 'sent';
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
+        onTap: () => _showTransactionDetail(tx),
         leading: CircleAvatar(
           backgroundColor: (isSent ? AppTheme.error : AppTheme.success).withValues(alpha: 0.15),
           child: Icon(
