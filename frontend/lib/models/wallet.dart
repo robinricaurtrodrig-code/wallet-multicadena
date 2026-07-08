@@ -49,14 +49,18 @@ class WalletData {
 
 /// Modelo que representa una transaccion en la blockchain
 class Transaction {
-  final String txHash;      // Hash unico de la transaccion en la blockchain
-  final String network;     // Red donde ocurrio la transaccion
-  final String type;        // Tipo: "sent" (enviado) o "received" (recibido)
-  final double amount;      // Monto de la transaccion
-  final double fee;         // Comision pagada en la transaccion
-  final String status;      // Estado: "pendiente", "confirmada", "fallida"
-  final String explorerUrl; // URL para ver la transaccion en el explorador de bloques
-  final DateTime? timestamp; // Fecha y hora de la transaccion
+  final String txHash;
+  final String network;
+  final String type;
+  final double amount;
+  final double fee;
+  final String status;
+  final String explorerUrl;
+  final DateTime? timestamp;
+  final String fromAddress;
+  final String toAddress;
+  final int blockNumber;
+  final int slot;
 
   Transaction({
     required this.txHash,
@@ -67,9 +71,12 @@ class Transaction {
     this.status = 'pendiente',
     required this.explorerUrl,
     this.timestamp,
+    this.fromAddress = '',
+    this.toAddress = '',
+    this.blockNumber = 0,
+    this.slot = 0,
   });
 
-  /// Construye un Transaction desde la respuesta JSON del backend
   factory Transaction.fromJson(Map<String, dynamic> json) {
     return Transaction(
       txHash: json['tx_hash'] ?? '',
@@ -80,6 +87,10 @@ class Transaction {
       status: json['status'] ?? 'pendiente',
       explorerUrl: json['explorer_url'] ?? '',
       timestamp: json['timestamp'] != null ? DateTime.tryParse(json['timestamp']) : null,
+      fromAddress: json['from_address'] ?? '',
+      toAddress: json['to_address'] ?? '',
+      blockNumber: (json['block_number'] ?? 0),
+      slot: (json['slot'] ?? 0),
     );
   }
 }

@@ -121,6 +121,10 @@ class TransactionHistoryItem(BaseModel):
     status: str
     timestamp: str
     explorer_url: str
+    from_address: str = ""
+    to_address: str = ""
+    block_number: int = 0
+    slot: int = 0
 
 
 class PriceResponse(BaseModel):

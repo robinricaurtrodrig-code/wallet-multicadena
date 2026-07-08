@@ -277,6 +277,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   void _showTransactionDetail(Transaction tx) {
     final isSent = tx.type == 'sent';
+    final symbol = tx.network == "solana" ? "SOL" : tx.network == "bitcoin" ? "BTC" : "BNB";
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -308,14 +309,30 @@ class _HistoryScreenState extends State<HistoryScreen> {
               const Divider(),
               _detailRow('Estado', tx.status),
               const Divider(),
-              _detailRow('Monto', '${tx.amount.toStringAsFixed(8)} ${tx.network == "solana" ? "SOL" : tx.network == "bitcoin" ? "BTC" : "BNB"}'),
+              _detailRow('Monto', '${tx.amount.toStringAsFixed(8)} $symbol'),
               const Divider(),
               if (tx.fee > 0) ...[
-                _detailRow('Comision', '${tx.fee.toStringAsFixed(8)} ${tx.network == "solana" ? "SOL" : tx.network == "bitcoin" ? "BTC" : "BNB"}'),
+                _detailRow('Comision', '${tx.fee.toStringAsFixed(8)} $symbol'),
+                const Divider(),
+              ],
+              if (tx.fromAddress.isNotEmpty) ...[
+                _detailRow('Desde', tx.fromAddress),
+                const Divider(),
+              ],
+              if (tx.toAddress.isNotEmpty) ...[
+                _detailRow('Hacia', tx.toAddress),
                 const Divider(),
               ],
               _detailRow('Hash', tx.txHash),
               const Divider(),
+              if (tx.blockNumber > 0) ...[
+                _detailRow('Bloque', tx.blockNumber.toString()),
+                const Divider(),
+              ],
+              if (tx.slot > 0) ...[
+                _detailRow('Slot', tx.slot.toString()),
+                const Divider(),
+              ],
               if (tx.timestamp != null) ...[
                 _detailRow('Fecha', _formatDate(tx.timestamp!)),
                 const Divider(),

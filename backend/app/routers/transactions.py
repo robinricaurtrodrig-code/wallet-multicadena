@@ -199,11 +199,15 @@ async def get_history(
                 tx_hash=tx.get("signature", tx.get("hash", tx.get("tx_hash", ""))),
                 network=network,
                 type=tx.get("type", "unknown"),
-                amount=tx.get("amount", 0),
+                amount=tx.get("amount", abs(tx.get("value", 0))),
                 fee=tx.get("fee", 0),
                 status=tx.get("status", "pendiente"),
                 timestamp=datetime.datetime.fromtimestamp(tx["blockTime"]).isoformat() if tx.get("blockTime") else "",
                 explorer_url=f"{EXPLORER_URLS[network]}{tx.get('signature', tx.get('hash', tx.get('tx_hash', '')))}",
+                from_address=tx.get("from", ""),
+                to_address=tx.get("to", ""),
+                block_number=tx.get("block", tx.get("blockNumber", 0)),
+                slot=tx.get("slot", tx.get("block_number", 0)),
             )
             for tx in txs
         ]
